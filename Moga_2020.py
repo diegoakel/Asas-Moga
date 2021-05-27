@@ -1,6 +1,7 @@
 import math
 import random
 import Modelo
+import analise
 
 def crossover(matriz_variaveis, p, q, x_min, x_max):
         pai1_ad = []
@@ -81,7 +82,6 @@ def crossover(matriz_variaveis, p, q, x_min, x_max):
 
         return filho1_final, filho2_final
 
-
 def mutation(solution):
     decisor = random.random()
     posicao = random.randint(0, len(solution))
@@ -95,20 +95,17 @@ def mutation(solution):
           solution = parte1 + '0' + parte2
     return solution
 
-
 def criar_individuo_random(x_min, x_max):
    individuo = [ ]
    for i in range(0, len(x_min)):
          individuo.append(x_min[i] +(x_max[i] - x_min[i])*random.random())      
    return individuo
 
-
 def arredondarpop(matriz_pop, x_res):
    for i in range (0, len(matriz_pop)):
       for j in range(0, len(x_res)):
          matriz_pop[i][j] = round(matriz_pop[i][j], x_res[j])
    return matriz_pop
-
 
 def evoluir(matriz_variaveis, x_min, x_max):
    filhos = [ ]
@@ -155,22 +152,28 @@ def Distancia_Escalar(individuo, p, q):
         return (temp**0.5)                 
 
 def Elitismo(rank):
+   # print (rank)
    new_solution = []           
    for i in range(0, len(rank)):
       for j in range(0, len(rank)):
          if(rank[j] == i) and (len(new_solution) < Modelo.pop_size):
+            # print (rank[j])
             new_solution.append(j)
+            # print (new_solution)
    return new_solution
       
 
 def dominated(matriz_function, p, q):
+   # print (matriz_function)
+   # print (f"P: {matriz_function[p]}, Q: {matriz_function[q]}")
+
    for i in range(0, len(matriz_function[p])):
       if(matriz_function[p][i] < matriz_function[q][i]):
          return 1
    return 0 
 
 def Rank_pop(matriz_function):
-        rank = [0 for i in range(0, len(matriz_function))]
+        rank = [0 for i in range(0, len(matriz_function))] 
         for p in range(0, len(matriz_function)):
                 for q in range(0, len(matriz_function)):
                         if(p != q):
@@ -191,7 +194,7 @@ def Adicionar_Filhos(individuo, filhos):
    return individuo
 
 def Avalia_Individuo_NãoViavel():
-   objective = [math.inf for i in range (0, len(Modelo.f_pen))]
+   objective = [math.inf for i in range (0, Modelo.no_objetivo)]
    constraint = [0 for i in range (0, len(Modelo.g_limite))]
    return objective, constraint
 
@@ -205,7 +208,7 @@ def Avaliar_Pop(individuo, gen_no):
       if(viavel_x == 1):
          function_objective[i], function_constraint[i] = Avalia_Individuo_NãoViavel()
       else:
-         function_objective[i], function_constraint[i] = Modelo.Avalia_Individuo_Viavel(individuo, i)
+         function_objective[i], function_constraint[i] = Modelo.Avalia_Individuo_Viavel(individuo, i,gen_no)
       function_objective_penalizado[i] = Penalizacao(function_objective[i], function_constraint[i], Modelo.g_sinal, Modelo.g_limite, Modelo.f_pen)
       Modelo.Individuo_Avaliado(gen_no, i, individuo[i], function_objective[i], function_constraint[i], function_objective_penalizado[i])
       
@@ -221,22 +224,19 @@ def Completa_PopInicial(pop_new):
 def Evolucao(pop_new):
    pop_new = Completa_PopInicial(pop_new)
    for gen_no in range (0, Modelo.max_gen):
-        Modelo.Nova_GeracaoIniciada(gen_no, pop_new)
-        individuo = pop_new[:]
-        filhos = evoluir(individuo, Modelo.x_min, Modelo.x_max)
-        individuo = Adicionar_Filhos(individuo, filhos)
-        function_objective, function_constraint, function_objective_penalizado = Avaliar_Pop(individuo, gen_no)        
-        
-        rank = Rank_pop(function_objective_penalizado)
-        new_solution = Elitismo(rank)
+      Modelo.Nova_GeracaoIniciada(gen_no, pop_new)
+      individuo = pop_new[:]
+      filhos = evoluir(individuo, Modelo.x_min, Modelo.x_max)
+      individuo = Adicionar_Filhos(individuo, filhos)
+      function_objective, function_constraint, function_objective_penalizado = Avaliar_Pop(individuo, gen_no)        
 
-        Modelo.Elitismo_Aplicado(rank, new_solution)
+      rank = Rank_pop(function_objective_penalizado)
 
-        # Só lista de valores
-        pop_new = Criar_NovaGeracao(individuo, new_solution)
-      #   print (pop_new)
+      new_solution = Elitismo(rank) # Retorna lista de indexes (os melhores)
 
+      #   Modelo.Elitismo_Aplicado(rank, new_solution)
 
+      pop_new = Criar_NovaGeracao(individuo, new_solution)
 
    Modelo.Evolucao_completada(pop_new)
 

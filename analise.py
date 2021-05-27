@@ -99,7 +99,10 @@ def mtow(self, rho, coeficientes):
         T = a*((V*0.7)**2)+b*(V*0.7)+c
         D = self.drag(V) #self.rho*V**(2)*0.5*self.CD*self.S
         L = self.lift(V) #self.rho*V**(2)*0.5*self.CL*self.S
-        Slo = round((1.44*(W)**(2))/(self.g*self.rho*self.S*self.CL*(T-(D+self.mi*(W-L)))), 2)
+        if self.CL == 0:
+            Slo = 2*self.pista_total
+        else:
+            Slo = round((1.44*(W)**(2))/(self.g*self.rho*self.S*self.CL*(T-(D+self.mi*(W-L)))), 2)
         
         if Slo > self.pista_total:
             break    
@@ -130,7 +133,7 @@ def analisa(self, metodo_massa):
     self.e_lista = []
     self.alfa_lista = []
 
-    for i in range(12, 15, 1):
+    for i in range(13, 14, 1):
         self.coeficientes(i)
         self.CD_lista.append(self.CD)
         self.CL_lista.append(self.CL)
@@ -143,7 +146,7 @@ def analisa(self, metodo_massa):
     return data
 
 
-def fake_analisa(x):
+def calcula_carga_paga(x,gen_no):
     fake_env = [x[0],x[0]+ x[1],x[0] + x[1] + x[2]]
     fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]
     fake_offset = [x[7], x[7] + x[8], x[7] + x[8] + x[9]]
@@ -151,9 +154,27 @@ def fake_analisa(x):
 
     _asa = Asa.asa(fake_env,fake_corda, fake_offset)
     _asa.analisa()
+    _asa.salva_asa(gen_no)
 
     return _asa.pontuacao
 
+def retorna_envergadura(x):
+    fake_env = [x[0],x[0]+ x[1],x[0] + x[1] + x[2]]
+    fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]
+    fake_offset = [x[7], x[7] + x[8], x[7] + x[8] + x[9]]
+
+    _asa = Asa.asa(fake_env,fake_corda, fake_offset)
+
+    return _asa.B
+# def salva_fake(x,geracao):
+
+#     for individuo in x:
+#         fake_env = [individuo[0],individuo[0]+ individuo[1],individuo[0] + individuo[1] + individuo[2]]
+#         fake_corda = [individuo[3],individuo[3] - individuo[4], individuo[3] - individuo[4] - individuo[5], individuo[3]- individuo[4] - individuo[5] - individuo[6]]
+#         fake_offset = [individuo[7], individuo[7] + individuo[8], individuo[7] + individuo[8] + individuo[9]]
+
+#         _asa = Asa.asa(fake_env,fake_corda, fake_offset)
+#         _asa.salva_asa(geracao)
 
 
 def metodo_por_MTOW(MTOW , PORCENTAGEM = 15):

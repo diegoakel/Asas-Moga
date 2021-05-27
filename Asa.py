@@ -52,3 +52,45 @@ class asa():
                 
     def analisa(self, metodo_massa = 'MTOW'):
         analise.analisa(self, metodo_massa)
+
+    def salva_asa(self, geracao):
+        o  = open(f"asas_todas/geracao_{geracao}_individuo{self.S}.avl", "w")
+        o.write(" Urutau 2020 (2)\n" +
+        "0.0                                 | Mach\n" +
+        "0     0     0.0                     | iYsym  iZsym  Zsym\n"+
+        "%f     %f     %f   | Sref   Cref   Bref\n" %(self.S, self.mac, self.B)+
+        "0.00000     0.00000     0.00000   | Xref   Yref   Zref\n"+
+        "0.00                               | CDp  (optional)\n"+
+        "SURFACE                      | (keyword)\n"+
+        "Main Wing\n"+
+        "11        1.0\n"+
+        "INDEX                        | (keyword)\n"+
+        "1814                         | Lsurf\n"+
+        "YDUPLICATE\n"+
+        "0.0\n"+
+        "SCALE\n"+
+        "1.0  1.0  1.0\n"+
+        "TRANSLATE\n"+
+        "0.0  0.0  0.0\n"+
+        "ANGLE\n"+
+        "0.000                         | dAinc\n"+
+        "SECTION                                              |  (keyword)\n"+
+        "0.0000    0.0000    0.0000    %f   0.000    8    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %(self.cordas[0])+
+        "AFIL 0.0 1.0\n"+
+        "airfoil.dat\n"+
+        "SECTION                                                     |  (keyword)\n" +
+        "%f    %f    0.0000    %f   0.000    8    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[0],  self.envs[0], self.cordas[1])+
+        "AFIL 0.0 1.0\n"+
+        "airfoil.dat\n"+
+        "SECTION                                                     |  (keyword)\n" +
+        "%f   %f    0.0000    %f   0.000   13    1   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[1],  self.envs[1], self.cordas[2])+
+        "AFIL 0.0 1.0\n"+
+        "airfoil.dat \n" +
+        "SECTION                                                     |  (keyword)\n" +
+        "%f    %f    0.0000    %f   0.000   13    1   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[2],  self.envs[2], self.cordas[3])+
+        "AFIL 0.0 1.0\n" +
+        "airfoil.dat \n" +
+        f"#{self.pontuacao}"
+        # 
+        )
+        o.close()
