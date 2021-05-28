@@ -120,6 +120,7 @@ def evoluir(matriz_variaveis, x_min, x_max):
 
 def Buscar_Ind_Distante(matriz_variaveis, p):
         dist_temp = 0
+        i_temp = 0
         for i in range(0, len(matriz_variaveis)):
                 if (i != p):
                         temp = Distancia_Escalar(matriz_variaveis, p, i)

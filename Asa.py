@@ -53,8 +53,8 @@ class asa():
     def analisa(self, metodo_massa = 'MTOW'):
         analise.analisa(self, metodo_massa)
 
-    def salva_asa(self, geracao):
-        o  = open(f"asas_todas/geracao_{geracao}_individuo{self.S}.avl", "w")
+    def salva_asa(self, geracao,n):
+        o  = open(f"asas_todas/geracao_{geracao}_individuo{n}.avl", "w")
         o.write(" Urutau 2020 (2)\n" +
         "0.0                                 | Mach\n" +
         "0     0     0.0                     | iYsym  iZsym  Zsym\n"+

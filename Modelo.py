@@ -10,7 +10,7 @@ import analise
 #parametro otimização
 pop_size = 20
 taxa_mutacao = 0.04
-max_gen = 1
+max_gen = 300
 
 #Modelo do problema
 no_objetivo = 1
@@ -34,7 +34,7 @@ def Avalia_Individuo_Viavel(individuo, n,gen_no):
    constraint = []
 
    constraint.append(analise.retorna_envergadura(individuo[n]))
-   objective.append(-1* analise.calcula_carga_paga(individuo[n],gen_no))
+   objective.append(-1* analise.calcula_carga_paga(individuo[n],gen_no,n))
 
    return objective, constraint
 
