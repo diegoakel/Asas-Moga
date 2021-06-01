@@ -1,6 +1,6 @@
 # import Estimação_de_massa as est
 import analise
-
+import Modelo
 class asa():
     def __init__(self, B, cordas, offsets, alfa_stol = 13.5):
         self.envs = B
@@ -49,7 +49,12 @@ class asa():
         self.MTOW = self.calc_massa(metodo_massa)[0]
         self.carga_paga = (self.MTOW - self.calc_massa(metodo_massa)[1]) # Empirical
         self.pontuacao = self.carga_paga
-                
+    
+    def checa_viavel(self):
+        self.viavel = 0
+        if self.B > Modelo.g_limite[0]:
+            self.viavel = 1 # Significa Não Viável
+       
     def analisa(self, metodo_massa = 'MTOW'):
         analise.analisa(self, metodo_massa)
 

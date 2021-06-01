@@ -182,12 +182,11 @@ def calcula_carga_paga(x,gen_no,n):
 
 def retorna_envergadura(x):
     fake_env = [x[0],x[0]+ x[1],x[0] + x[1] + x[2]]
+    return fake_env[2]
+
+def retorna_corda_ponta(x):
     fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]
-    fake_offset = [x[7], x[7] + x[8], x[7] + x[8] + x[9]]
-
-    _asa = Asa.asa(fake_env,fake_corda, fake_offset)
-
-    return _asa.B
+    return fake_corda[3]
 
 def metodo_por_MTOW(MTOW , PORCENTAGEM = 15):
     '''
@@ -228,7 +227,7 @@ def calc_massa(self, metodo_massa):
     fator_corretivo = 1.09
     MTOW = ((self.W/self.g)/fator_corretivo) # MTOW em kg
     
-    massa_vazia = (11.48*((self.S)**2)) - 26.55*(self.S) + 19.44
+    massa_vazia = (1.539331*((self.S)**2)) + 1.341043*(self.S)
     
     if(metodo_massa == 'MTOW'):
         self.massa_asa = metodo_por_MTOW(MTOW)

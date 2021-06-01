@@ -137,6 +137,11 @@ def Penalizacao(objetivo, restricao, g_sinal, g_limite, fatores_pen):
             objetivo_pen[i] = objetivo_pen[i] + abs((restricao[j] - g_limite[j]) * fatores_pen[j])
    return objetivo_pen
 
+def Checa_viavel(restricao, g_sinal, g_limite):
+   for j in range(0, len(restricao)):
+      if(g_sinal[j] * restricao[j] < g_sinal[j] * g_limite[j]):
+         return 1 # 1 significa Não Viável
+   return 0
 
 def Viabilidade_Explicita(x_min, x_max, vetor_x):
    for i in range (0, len(vetor_x)):
@@ -203,6 +208,7 @@ def Avalia_Individuo_NãoViavel():
 def Avaliar_Pop(individuo, gen_no):
    function_objective = [0 for i in range (0, len(individuo))]
    function_constraint = [0 for i in range (0, len(individuo))]
+   function_viavel = [0 for i in range (0, len(individuo))]
    function_objective_penalizado = [0 for i in range (0, len(individuo))]
    for i in range(0, len(individuo)):
       viavel_x = Viabilidade_Explicita(Modelo.x_min, Modelo.x_max, individuo[i])
@@ -210,10 +216,13 @@ def Avaliar_Pop(individuo, gen_no):
          function_objective[i], function_constraint[i] = Avalia_Individuo_NãoViavel()
       else:
          function_objective[i], function_constraint[i] = Modelo.Avalia_Individuo_Viavel(individuo, i,gen_no)
-      function_objective_penalizado[i] = Penalizacao(function_objective[i], function_constraint[i], Modelo.g_sinal, Modelo.g_limite, Modelo.f_pen)
-      Modelo.Individuo_Avaliado(gen_no, i, individuo[i], function_objective[i], function_constraint[i], function_objective_penalizado[i])
       
-   return function_objective, function_constraint, function_objective_penalizado
+      function_objective_penalizado[i] = Penalizacao(function_objective[i], function_constraint[i], Modelo.g_sinal, Modelo.g_limite, Modelo.f_pen)
+      function_viavel[i] = Checa_viavel(function_constraint[i], Modelo.g_sinal, Modelo.g_limite)
+
+      Modelo.Individuo_Avaliado(gen_no, i, individuo[i], function_objective[i], function_constraint[i], function_objective_penalizado[i], function_viavel[i])
+      
+   return function_objective, function_constraint, function_objective_penalizado, function_viavel
 
 
 def Completa_PopInicial(pop_new):
@@ -229,7 +238,7 @@ def Evolucao(pop_new):
       individuo = pop_new[:]
       filhos = evoluir(individuo, Modelo.x_min, Modelo.x_max)
       individuo = Adicionar_Filhos(individuo, filhos)
-      function_objective, function_constraint, function_objective_penalizado = Avaliar_Pop(individuo, gen_no)        
+      function_objective, function_constraint, function_objective_penalizado, function_viavel = Avaliar_Pop(individuo, gen_no)        
 
       rank = Rank_pop(function_objective_penalizado)
 
