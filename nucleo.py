@@ -7,3 +7,5 @@ Moga_2020.Evolucao(pop_new)
 fim = time.time()
 
 print (fim-inicio)
+
+# Teste Absoluto
