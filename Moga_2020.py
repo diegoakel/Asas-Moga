@@ -200,12 +200,11 @@ def Adicionar_Filhos(individuo, filhos):
    return individuo
 
 def Avalia_Individuo_NãoViavel():
-   objective = [math.inf for i in range (0, Modelo.no_objetivo)]
+   objective = [(math.inf * Modelo.f_sinal[i]) for i in range (0, Modelo.no_objetivo)]
    constraint = [0 for i in range (0, len(Modelo.g_limite))]
    return objective, constraint
 
-
-def Avaliar_Pop(individuo, gen_no):
+def Avaliar_Pop(individuo, gen_no, geraca_inicial = False):
    function_objective = [0 for i in range (0, len(individuo))]
    function_constraint = [0 for i in range (0, len(individuo))]
    function_viavel = [0 for i in range (0, len(individuo))]
@@ -220,15 +219,31 @@ def Avaliar_Pop(individuo, gen_no):
       function_objective_penalizado[i] = Penalizacao(function_objective[i], function_constraint[i], Modelo.g_sinal, Modelo.g_limite, Modelo.f_pen)
       function_viavel[i] = Checa_viavel(function_constraint[i], Modelo.g_sinal, Modelo.g_limite)
 
-      Modelo.Individuo_Avaliado(gen_no, i, individuo[i], function_objective[i], function_constraint[i], function_objective_penalizado[i], function_viavel[i])
+      if not geraca_inicial:
+         Modelo.Individuo_Avaliado(gen_no, i, individuo[i], function_objective[i], function_constraint[i], function_objective_penalizado[i], function_viavel[i])
       
    return function_objective, function_constraint, function_objective_penalizado, function_viavel
 
+def limpa_populacao_inviavel(populacao, function_viavel):
+   for i in range(len(function_viavel)-1, -1, -1):
+      if function_viavel[i] == 1:
+         del populacao[i]
+         del function_viavel[i]
+         print (f"Removido individuo {i}")
+   return populacao
 
 def Completa_PopInicial(pop_new):
-   while(len(pop_new) < Modelo.pop_size):
-      pop_new.append(criar_individuo_random(Modelo.x_min, Modelo.x_max))
-   pop_new = arredondarpop(pop_new, Modelo.x_res)
+   continua = True
+   while continua:
+      while(len(pop_new) < Modelo.pop_size):
+         pop_new.append(criar_individuo_random(Modelo.x_min, Modelo.x_max))
+      pop_new = arredondarpop(pop_new, Modelo.x_res)
+      function_objective, function_constraint, function_objective_penalizado, function_viavel = Avaliar_Pop(pop_new, -1, True)        
+      continua = sum(function_viavel)/len(function_viavel) > (1 - Modelo.porcentagem_viavel_primeira_geracao)
+      
+      if continua:
+         pop_new = limpa_populacao_inviavel(pop_new, function_viavel)
+      
    return pop_new
 
 def Evolucao(pop_new):

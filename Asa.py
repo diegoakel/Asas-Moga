@@ -1,8 +1,10 @@
 # import Estimação_de_massa as est
-import analise
 import Modelo
 class asa():
-    def __init__(self, B, cordas, offsets, alfa_stol = 13.5):
+    def __init__(self):
+        pass
+
+    def setar_geometria(self, B, cordas, offsets, alfa_stol = 13.5):
         self.envs = B
         self.B = (B[-1]*2)
         self.offsets = offsets
@@ -25,7 +27,7 @@ class asa():
         self.g = 9.81
         self.rho = 1.225
         self.mi = 0.025
-        self.pista_total = 90
+        self.pista_total = Modelo.comprimento_pista_maxima
 
     def file_and_commands(self, alfa_stol = 13.5): # Não mexer nisso~
         analise.file_and_commands(self,alfa_stol)
@@ -49,17 +51,12 @@ class asa():
         self.MTOW = self.calc_massa(metodo_massa)[0]
         self.carga_paga = (self.MTOW - self.calc_massa(metodo_massa)[1]) # Empirical
         self.pontuacao = self.carga_paga
-    
-    def checa_viavel(self):
-        self.viavel = 0
-        if self.B > Modelo.g_limite[0]:
-            self.viavel = 1 # Significa Não Viável
        
     def analisa(self, metodo_massa = 'MTOW'):
         analise.analisa(self, metodo_massa)
 
     def salva_asa(self, geracao,n):
-        o  = open(f"asas_todas/geracao_{geracao}_individuo{n}.avl", "w")
+        o  = open(f"../Banco_asas/asas_todas4/geracao_{geracao}_individuo{n}.avl", "w")
         o.write(" Urutau 2020 (2)\n" +
         "0.0                                 | Mach\n" +
         "0     0     0.0                     | iYsym  iZsym  Zsym\n"+
