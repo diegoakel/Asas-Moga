@@ -1,8 +1,5 @@
 from random import uniform as random
-import os
 import pandas as pd
-import apoio # visualizações
-import openpyxl
 import analise
 
 # Parametros do problema
