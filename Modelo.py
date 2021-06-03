@@ -1,7 +1,6 @@
 from random import uniform as random
 import os
 import pandas as pd
-from Asa import asa
 import apoio # visualizações
 import openpyxl
 import analise
@@ -13,7 +12,7 @@ comprimento_pista_maxima = 90
 #parametro otimização
 pop_size = 20
 taxa_mutacao = 0.04
-max_gen = 3
+max_gen = 300
 porcentagem_viavel_primeira_geracao = 0.5
 
 #Modelo do problema
