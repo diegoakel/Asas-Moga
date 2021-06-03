@@ -1,3 +1,5 @@
+# Esse é o repositório aboluto.
+
 import Moga_2020
 import time
 
