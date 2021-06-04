@@ -5,9 +5,6 @@ import inspect
 import subprocess as sp
 import Modelo
 class asa():
-    def __init__(self):
-        pass
-
     def setar_geometria(self, B, cordas, offsets, alfa_stol = 13.5):
         self.envs = B
         self.B = (B[-1]*2)
@@ -28,9 +25,9 @@ class asa():
         self.alfa_stol = alfa_stol
 
         # Valores que não são da aeronave
-        self.g = 9.81
-        self.rho = 1.225
-        self.mi = 0.025
+        self.g = Modelo.g
+        self.rho = Modelo.rho_ar
+        self.mi = Modelo.mi_solo
         self.pista_total = Modelo.comprimento_pista_maxima
 
     def file_and_commands(self, alfa_stol = 13.5): # Não mexer nisso~
@@ -47,20 +44,44 @@ class asa():
 
     def mtow (self, rho = 1.225, coeficientes = (-0.0126, -0.5248, 40.0248)):
         return  mtow(self, rho, coeficientes)
-    
-    def calc_massa(self, metodo_massa):
-        return  calc_massa(self, metodo_massa)
-        
-    def calc_pontuacao (self, metodo_massa):
-        self.MTOW = self.calc_massa(metodo_massa)[0]
-        self.carga_paga = (self.MTOW - self.calc_massa(metodo_massa)[1]) # Empirical
+           
+    def calc_pontuacao (self):
+        self.MTOW = self.calc_massa()[0]
+        self.carga_paga = (self.MTOW - self.calc_massa()[1]) # Empirical
         self.pontuacao = self.carga_paga
        
-    def analisa(self, metodo_massa = 'MTOW'):
-        analisa(self, metodo_massa)
+    def analisa(self):
+        # Calculos para situação de stol
+        self.coeficientes(self.alfa_stol)
+        self.mtow()
+        self.calc_pontuacao()
+
+        # Calculos para a polar
+        self.CD_lista = []
+        self.CL_lista = []
+        self.e_lista = []
+        self.alfa_lista = []
+
+        # for i in range(13, 14, 1):
+        #     self.coeficientes(i)
+        #     self.CD_lista.append(self.CD)
+        #     self.CL_lista.append(self.CL)
+        #     self.e_lista.append(self.e)
+        #     self.alfa_lista.append(i)
+
+        data = [self.S, self.B, self.AR,  self.afil, self.MTOW, self.carga_paga,
+            self.pontuacao, self.alfa_lista, self.CD_lista, self.CL_lista]
+
+        return data
+
+    def calc_massa(self):
+        fator_corretivo = 1.09
+        MTOW = ((self.W/self.g)/fator_corretivo) # MTOW em kg
+        massa_vazia = (1.539331*((self.S)**2)) + 1.341043*(self.S)
+        return (MTOW, massa_vazia)
 
     def salva_asa(self, geracao,n):
-        o  = open(f"../Banco_asas/asas_todas4/geracao_{geracao}_individuo{n}.avl", "w")
+        o  = open(f"../Banco_asas/asas_todas5/geracao_{geracao}_individuo{n}.avl", "w")
         o.write(" Urutau 2020 (2)\n" +
         "0.0                                 | Mach\n" +
         "0     0     0.0                     | iYsym  iZsym  Zsym\n"+
@@ -186,15 +207,10 @@ def coeficientes(self, angulo):
         matches = re.findall(r"\d\.\d\d\d\d", line)
         for value in matches:
             coefficients.append(float(value))
-    
 
-    CD = coefficients[-7]
-    CL = coefficients[-8]    
-    e =  coefficients[-1]     
-
-    self.CD = CD
-    self.CL = CL
-    self.e = e
+    self.CD  = coefficients[-7]
+    self.CL = coefficients[-8]    
+    self.e =  coefficients[-1]     
     
     # Limpar
     dirList = os.listdir()
@@ -203,8 +219,6 @@ def coeficientes(self, angulo):
         if (file == "asa.avl") or (file == "resultado.txt") or  (file == "comandos.txt"):
             arquivo = file
             os.remove(arquivo)
-    
-    #return (CD_CL)
 
 def mtow(self, rho, coeficientes):
     a = coeficientes[0]
@@ -214,9 +228,9 @@ def mtow(self, rho, coeficientes):
     for k in range (0, 270):
         if self.CL == 0:
             Slo = 2*self.pista_total
-            W= (k/(9)) * self.g
+            W = 0
         else:
-            W= (k/(9)) * self.g
+            W = (k/(9)) * self.g
             V = math.sqrt((2*W)/(self.rho*self.S*self.CL)) * 1.2 * 0.7
             T = a*((V*0.7)**2)+b*(V*0.7)+c
             D = self.drag(V) #self.rho*V**(2)*0.5*self.CD*self.S
@@ -228,41 +242,6 @@ def mtow(self, rho, coeficientes):
 
     self.W = W # MTOW em Newton
     return W
-
-
-def analisa(self, metodo_massa):
-    '''
-    Retorna uma lista com alguns resultados de analise da asa.
-    
-    metodo_massa: metodo com qual se estima a massa da asa
-    
-        'MTOW' = Estima a massa com base no MTOW de acordo com dados passados 
-        
-        'RAZAO' = Estima a massa com base na razao entre o peso de asas anteriores projetadas e suas areas
-                    logo o parametro a ser dados para esse metodo é a area da asa que deseja estimar sua massa
-    '''
-    # Calculos para situação de stol
-    self.coeficientes(self.alfa_stol)
-    self.mtow()
-    self.calc_pontuacao(metodo_massa)
-
-    # Calculos para a polar
-    self.CD_lista = []
-    self.CL_lista = []
-    self.e_lista = []
-    self.alfa_lista = []
-
-    # for i in range(13, 14, 1):
-    #     self.coeficientes(i)
-    #     self.CD_lista.append(self.CD)
-    #     self.CL_lista.append(self.CL)
-    #     self.e_lista.append(self.e)
-    #     self.alfa_lista.append(i)
-
-    data = [self.S, self.B, self.AR,  self.afil, self.MTOW, self.carga_paga,
-        self.pontuacao, self.alfa_lista, self.CD_lista, self.CL_lista]
-
-    return data
 
 def calcula_carga_paga(x,gen_no,n):
     fake_env = [x[0],x[0]+ x[1],x[0] + x[1] + x[2]]
@@ -285,54 +264,3 @@ def retorna_envergadura(x):
 def retorna_corda_ponta(x):
     fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]
     return fake_corda[3]
-
-def metodo_por_MTOW(MTOW , PORCENTAGEM = 15):
-    '''
-    Geralmente a massa da asa é 30 porcento da carga vazia
-    Geralmente a massa da asa é 9 porcento do MTOW (NEWTON POR NEWTON)
-    '''
-    # G = 9.81 #m/s^2
-    
-    m = MTOW * (PORCENTAGEM / 100)
-    return m
-
-
-def metodo_por_constante(AREA_OBJETIVO, PESO = 0, AREA = 0, CONSTANTE = 20.3605):
-    '''
-    Geralmente a constante PESO DA ASA / AREA DA ASA É 15,8
-    '''
-    G = 9.81 #m/s^2
-        
-    if CONSTANTE != 0:
-
-        PESO_OBJETIVO = CONSTANTE * AREA_OBJETIVO
-
-        m = PESO_OBJETIVO / G
-    
-    else:
-        
-        CONSTANTE = PESO / AREA
-
-        PESO_OBJETIVO = CONSTANTE * AREA_OBJETIVO
-
-        m = PESO_OBJETIVO / G
-
-
-    return m
-
-def calc_massa(self, metodo_massa):
-
-    fator_corretivo = 1.09
-    MTOW = ((self.W/self.g)/fator_corretivo) # MTOW em kg
-    
-    massa_vazia = (1.539331*((self.S)**2)) + 1.341043*(self.S)
-    
-    if(metodo_massa == 'MTOW'):
-        self.massa_asa = metodo_por_MTOW(MTOW)
-        
-    elif(metodo_massa == 'RAZAO'):
-        self.massa_asa = metodo_por_constante(self.S)
-        
-    massa_resto = massa_vazia - self.massa_asa 
-    
-    return (MTOW, massa_vazia, self.massa_asa, massa_resto)

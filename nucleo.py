@@ -10,4 +10,4 @@ fim = time.time()
 
 print (fim-inicio)
 
-# Teste Absoluto
+# Teste relativo
