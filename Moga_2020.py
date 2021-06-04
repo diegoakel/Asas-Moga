@@ -2,6 +2,8 @@ import math
 import random
 import Modelo
 import analise
+import constantes
+
 
 def crossover(matriz_variaveis, p, q, x_min, x_max):
         pai1_ad = []
@@ -137,17 +139,19 @@ def Penalizacao(objetivo, restricao, g_sinal, g_limite, fatores_pen):
             objetivo_pen[i] = objetivo_pen[i] + abs((restricao[j] - g_limite[j]) * fatores_pen[j])
    return objetivo_pen
 
-def Checa_viavel(restricao, g_sinal, g_limite):
+def Checa_viavel(vetor_x, restricao, g_sinal, g_limite):
+   if Viabilidade_Explicita(vetor_x) == 1:
+      return constantes.solucao_inviavel
    for j in range(0, len(restricao)):
       if(g_sinal[j] * restricao[j] < g_sinal[j] * g_limite[j]):
-         return 1 # 1 significa Não Viável
-   return 0
+         return constantes.solucao_inviavel # 1 significa Não Viável
+   return constantes.solucao_viavel
 
-def Viabilidade_Explicita(x_min, x_max, vetor_x):
+def Viabilidade_Explicita(vetor_x):
    for i in range (0, len(vetor_x)):
-           if(vetor_x[i] < x_min[i] or vetor_x[i] > x_max[i]):
-                   return 1 # não viável
-   return 0 # viável
+           if(vetor_x[i] < Modelo.x_min[i] or vetor_x[i] > Modelo.x_max[i]):
+                   return constantes.solucao_inviavel # não viável
+   return constantes.solucao_viavel # viável
                  
 def Distancia_Escalar(individuo, p, q):
         temp = 0
@@ -200,7 +204,7 @@ def Adicionar_Filhos(individuo, filhos):
    return individuo
 
 def Avalia_Individuo_NãoViavel():
-   objective = [(math.inf * Modelo.f_sinal[i]) for i in range (0, Modelo.no_objetivo)]
+   objective = [math.inf for i in range (0, Modelo.no_objetivo)]
    constraint = [0 for i in range (0, len(Modelo.g_limite))]
    return objective, constraint
 
@@ -210,14 +214,14 @@ def Avaliar_Pop(individuo, gen_no, geraca_inicial = False):
    function_viavel = [0 for i in range (0, len(individuo))]
    function_objective_penalizado = [0 for i in range (0, len(individuo))]
    for i in range(0, len(individuo)):
-      viavel_x = Viabilidade_Explicita(Modelo.x_min, Modelo.x_max, individuo[i])
+      viavel_x = Viabilidade_Explicita(individuo[i])
       if(viavel_x == 1):
          function_objective[i], function_constraint[i] = Avalia_Individuo_NãoViavel()
       else:
          function_objective[i], function_constraint[i] = Modelo.Avalia_Individuo_Viavel(individuo, i,gen_no)
       
       function_objective_penalizado[i] = Penalizacao(function_objective[i], function_constraint[i], Modelo.g_sinal, Modelo.g_limite, Modelo.f_pen)
-      function_viavel[i] = Checa_viavel(function_constraint[i], Modelo.g_sinal, Modelo.g_limite)
+      function_viavel[i] = Checa_viavel(individuo[i], function_constraint[i], Modelo.g_sinal, Modelo.g_limite)
 
       if not geraca_inicial:
          Modelo.Individuo_Avaliado(gen_no, i, individuo[i], function_objective[i], function_constraint[i], function_objective_penalizado[i], function_viavel[i])
