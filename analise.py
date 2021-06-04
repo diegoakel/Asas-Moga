@@ -226,7 +226,7 @@ def mtow(self, rho, coeficientes):
     c = coeficientes[2]
     
     for k in range (0, 270):
-        if self.CL == 0:
+        if (self.CL == 0) or (self.S < 0):
             Slo = 2*self.pista_total
             W = 0
         else:
@@ -260,6 +260,14 @@ def seta_viabilidade(viavel):
 def retorna_envergadura(x):
     fake_env = [x[0],x[0]+ x[1],x[0] + x[1] + x[2]]
     return (2*fake_env[2])
+
+def retorna_corda_1(x):
+    fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]
+    return fake_corda[1]
+
+def retorna_corda_2(x):
+    fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]
+    return fake_corda[2]
 
 def retorna_corda_ponta(x):
     fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]

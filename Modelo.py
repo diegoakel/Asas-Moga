@@ -10,7 +10,10 @@ mi_solo = 0.025
 
 # Parametros do problema
 envergadura_maxima = 4.2
-corda_ponta_minima = 0.01
+corda_ponta_minima = 0.05
+corda_minima = 0.05
+corda_fuselagem_maxima = 1
+corda_fuselagem_minimo = 0.1
 comprimento_pista_maxima = 90
 
 #parametro otimização
@@ -21,16 +24,16 @@ porcentagem_viavel_primeira_geracao = 0.5
 
 #Modelo do problema
 no_objetivo = 1
-no_restricoes = 2
+no_restricoes = 4
 
 # Env1, Env2, Env3, Chord0, Chord1, Chord2, Chord3, offset1, offset2, offset3
 x_res = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-x_min = [0.2, 0.2, 0.2, 0.35, 0, 0, 0, 0, 0 ,0]## x = deadrise, LCG
-x_max = [1.3,1.3,1.3, 0.5,0.15,0.15,0.15, 0.05, 0.05, 0.05]
+x_min = [0.2, 0.2, 0.2, corda_fuselagem_minimo, 0, 0, 0, 0, 0 ,0]## x = deadrise, LCG
+x_max = [2, 2, 2, corda_fuselagem_maxima, 0.15, 0.15, 0.15, 0.05, 0.05, 0.05]
 f_sinal = [constantes.maximizar] # "-" é maximizar e "+" é minimizar
-f_pen = [1000, 10000] ## f1, f2
-g_limite = [envergadura_maxima, corda_ponta_minima] ## g1, g2
-g_sinal = [constantes.menor_que, constantes.maior_que] ## negativo < lim; positivo > lim
+f_pen = [1000, 10000, 10000, 10000] ## f1, f2
+g_limite = [envergadura_maxima, corda_ponta_minima, corda_minima, corda_minima] ## g1, g2
+g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que] ## negativo < lim; positivo > lim
 
 
 
@@ -44,6 +47,8 @@ def Avalia_Individuo_Viavel(individuo, n,gen_no):
    constraint = []
 
    constraint.append(analise.retorna_envergadura(individuo[n]))
+   constraint.append(analise.retorna_corda_1(individuo[n]))
+   constraint.append(analise.retorna_corda_2(individuo[n]))   
    constraint.append(analise.retorna_corda_ponta(individuo[n]))
 
    objective.append(f_sinal[0] * analise.calcula_carga_paga(individuo[n],gen_no,n))
