@@ -244,9 +244,9 @@ def mtow(self, rho, coeficientes):
     return W
 
 def calcula_carga_paga(x,gen_no,n):
-    fake_env = [x[0],x[0]+ x[1],x[0] + x[1] + x[2]]
-    fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]
-    fake_offset = [x[7], x[7] + x[8], x[7] + x[8] + x[9]]
+    fake_env = [x[0],x[1],x[2]]
+    fake_corda = [x[3],x[4],x[5],x[6]]
+    fake_offset = [x[7], x[8], x[9]]
 
     _asa.setar_geometria(fake_env,fake_corda, fake_offset)
     _asa.analisa()
@@ -258,17 +258,45 @@ def seta_viabilidade(viavel):
     _asa.viavel = viavel
 
 def retorna_envergadura(x):
-    fake_env = [x[0],x[0]+ x[1],x[0] + x[1] + x[2]]
+    fake_env = [x[0],x[1],x[2]]
     return (2*fake_env[2])
 
 def retorna_corda_1(x):
-    fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]
+    fake_corda = [x[3],x[4],x[5],x[6]]
     return fake_corda[1]
 
 def retorna_corda_2(x):
-    fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]
+    fake_corda = [x[3],x[4],x[5],x[6]]
     return fake_corda[2]
 
 def retorna_corda_ponta(x):
-    fake_corda = [x[3],x[3] - x[4], x[3] - x[4] - x[5], x[3]- x[4] - x[5] - x[6]]
+    fake_corda = [x[3],x[4],x[5],x[6]]
     return fake_corda[3]
+
+def retorna_delta_envergadura_2(x):
+    fake_env = [x[0],x[1],x[2]]
+    return (fake_env[1]- fake_env[0])
+
+def retorna_delta_envergadura_3(x):
+    fake_env = [x[0],x[1],x[2]]
+    return (fake_env[2]- fake_env[1])
+
+def delta_corda_1(x):
+    fake_corda = [x[3],x[4],x[5],x[6]]
+    return (fake_corda[1]-fake_corda[0])
+
+def delta_corda_2(x):
+    fake_corda = [x[3],x[4],x[5],x[6]]
+    return (fake_corda[2]-fake_corda[1])
+
+def delta_corda_3(x):
+    fake_corda = [x[3],x[4],x[5],x[6]]
+    return (fake_corda[3]-fake_corda[2])
+
+def delta_offset2(x):
+    fake_offset = [x[7],x[8],x[9]]
+    return (fake_offset[1]-fake_offset[0])
+
+def delta_offset3(x):
+    fake_offset = [x[7],x[8],x[9]]
+    return (fake_offset[2]-fake_offset[1])
