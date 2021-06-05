@@ -81,7 +81,7 @@ class asa():
         return (MTOW, massa_vazia)
 
     def salva_asa(self, geracao,n):
-        o  = open(f"../Banco_asas/asas_todas5/geracao_{geracao}_individuo{n}.avl", "w")
+        o  = open(f"../Banco_asas/asas_todas6/geracao_{geracao}_individuo{n}.avl", "w")
         o.write(" Urutau 2020 (2)\n" +
         "0.0                                 | Mach\n" +
         "0     0     0.0                     | iYsym  iZsym  Zsym\n"+
@@ -117,7 +117,9 @@ class asa():
         "%f    %f    0.0000    %f   0.000   13    1   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[2],  self.envs[2], self.cordas[3])+
         "AFIL 0.0 1.0\n" +
         "airfoil.dat \n" +
-        f"#{self.pontuacao}"
+        f"#{self.pontuacao}" +
+        f"#{self.CL}" +
+        f"#{self.CD}" 
         # 
         )
         o.close()
