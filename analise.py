@@ -77,11 +77,11 @@ class asa():
     def calc_massa(self):
         fator_corretivo = 1.09
         MTOW = ((self.W/self.g)/fator_corretivo) # MTOW em kg
-        massa_vazia = (1.539331*((self.S)**2)) + 1.341043*(self.S)
-        return (MTOW, massa_vazia)
+        self.massa_vazia = (1.539331*((self.S)**2)) + 1.341043*(self.S)
+        return (MTOW, self.massa_vazia)
 
     def salva_asa(self, geracao,n):
-        o  = open(f"../Banco_asas/asas_todas5/geracao_{geracao}_individuo{n}.avl", "w")
+        o  = open(f"../Banco_asas/asas_todas7/geracao_{geracao}_individuo{n}.avl", "w")
         o.write(" Urutau 2020 (2)\n" +
         "0.0                                 | Mach\n" +
         "0     0     0.0                     | iYsym  iZsym  Zsym\n"+
@@ -117,9 +117,11 @@ class asa():
         "%f    %f    0.0000    %f   0.000   13    1   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[2],  self.envs[2], self.cordas[3])+
         "AFIL 0.0 1.0\n" +
         "airfoil.dat \n" +
-        f"#{self.pontuacao}" +
-        f"#{self.CL}" +
-        f"#{self.CD}" 
+        f"#{self.pontuacao} \n" +
+        f"#{self.CL}00000 \n" +
+        f"#{self.CD}00000 \n" +
+        f"#{self.massa_vazia}" 
+
         # 
         )
         o.close()
@@ -211,8 +213,8 @@ def coeficientes(self, angulo):
             coefficients.append(float(value))
 
     self.CD  = coefficients[-7]
-    self.CL = coefficients[-8]    
-    self.e =  coefficients[-1]     
+    self.CL = coefficients[-8] 
+    self.e =  coefficients[-1]
     
     # Limpar
     dirList = os.listdir()
