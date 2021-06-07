@@ -20,8 +20,8 @@ comprimento_pista_maxima = 90
 #parametro otimização
 pop_size = 20
 taxa_mutacao = 0.04
-max_gen = 0
-porcentagem_viavel_primeira_geracao = 0.5
+max_gen = 300
+porcentagem_viavel_primeira_geracao = 0.49
 
 #Modelo do problema
 no_objetivo = 1
@@ -43,7 +43,7 @@ def Evolucao_completada(pop_new):
 #    for i in range(0, pop_size):
 #         print("Envergadura:", pop_new[i][0] , pop_new[i][1], pop_new[i][2],"Cordas:", pop_new[i][3],pop_new[i][4],pop_new[i][5],pop_new[i][6],"Offsets:",pop_new[i][7],pop_new[i][8],pop_new[i][9])
 
-def Avalia_Individuo_Viavel(individuo, n,gen_no):
+def Avalia_Individuo_Viavel(individuo, n, gen_no):
    objective = []
    constraint = []
 
@@ -63,6 +63,32 @@ def Avalia_Individuo_Viavel(individuo, n,gen_no):
 
    return objective, constraint
 
+def pre_checagem(vetor_x):
+   if analise.retorna_envergadura(vetor_x) > envergadura_maxima:
+      return constantes.solucao_inviavel
+
+   if analise.retorna_delta_envergadura_2(vetor_x) < 0:
+      return constantes.solucao_inviavel
+   
+   if analise.retorna_delta_envergadura_3(vetor_x) < 0:
+      return constantes.solucao_inviavel
+
+   if analise.delta_corda_1(vetor_x) < 0:
+      return constantes.solucao_inviavel
+   
+   if analise.delta_corda_2(vetor_x) < 0:
+      return constantes.solucao_inviavel
+
+   if analise.delta_corda_3(vetor_x) < 0:
+      return constantes.solucao_inviavel
+   
+   if analise.delta_offset2(vetor_x) < 0:
+      return constantes.solucao_inviavel
+
+   if analise.delta_offset3(vetor_x) < 0:
+      return constantes.solucao_inviavel
+
+   return constantes.solucao_viavel
 
 def Individuo_Avaliado(gen_no, n, individuo, function_objective, function_constraint, function_objective_penalizado, function_viavel):
     analise.seta_viabilidade(function_viavel)
