@@ -1,9 +1,12 @@
 import math
 import random
 import Modelo
-import analise
 import constantes
+import historico
 
+cont_analise_historico = [0]
+cont_analise_nova = [0]
+cont_analise_pre_check = [0]
 
 def crossover(matriz_variaveis, p, q, x_min, x_max):
         pai1_ad = []
@@ -140,11 +143,16 @@ def Penalizacao(objetivo, restricao, g_sinal, g_limite, fatores_pen):
    return objetivo_pen
 
 def Checa_viavel(vetor_x, restricao, g_sinal, g_limite):
-   if Viabilidade_Explicita(vetor_x) == 1:
+   if Viabilidade_Explicita(vetor_x) == constantes.solucao_inviavel:
       return constantes.solucao_inviavel
+
+   if Modelo.pre_checagem(vetor_x) == constantes.solucao_inviavel :
+      return constantes.solucao_inviavel
+
    for j in range(0, len(restricao)):
       if(g_sinal[j] * restricao[j] < g_sinal[j] * g_limite[j]):
          return constantes.solucao_inviavel # 1 significa Não Viável
+
    return constantes.solucao_viavel
 
 def Viabilidade_Explicita(vetor_x):
@@ -174,10 +182,8 @@ def Elitismo(rank):
       
 
 def dominated(matriz_function, p, q):
-   # print (matriz_function)
-   # print (f"P: {matriz_function[p]}, Q: {matriz_function[q]}")
-
    for i in range(0, len(matriz_function[p])):
+      
       if(matriz_function[p][i] < matriz_function[q][i]):
          return 1
    return 0 
@@ -206,26 +212,59 @@ def Adicionar_Filhos(individuo, filhos):
 def Avalia_Individuo_NãoViavel():
    objective = [math.inf for i in range (0, Modelo.no_objetivo)]
    constraint = [0 for i in range (0, len(Modelo.g_limite))]
+
    return objective, constraint
 
-def Avaliar_Pop(individuo, gen_no, geraca_inicial = False):
-   function_objective = [0 for i in range (0, len(individuo))]
-   function_constraint = [0 for i in range (0, len(individuo))]
-   function_viavel = [0 for i in range (0, len(individuo))]
-   function_objective_penalizado = [0 for i in range (0, len(individuo))]
-   for i in range(0, len(individuo)):
-      viavel_x = Viabilidade_Explicita(individuo[i])
-      if(viavel_x == 1):
-         function_objective[i], function_constraint[i] = Avalia_Individuo_NãoViavel()
-      else:
-         function_objective[i], function_constraint[i] = Modelo.Avalia_Individuo_Viavel(individuo, i,gen_no)
-      
-      function_objective_penalizado[i] = Penalizacao(function_objective[i], function_constraint[i], Modelo.g_sinal, Modelo.g_limite, Modelo.f_pen)
-      function_viavel[i] = Checa_viavel(individuo[i], function_constraint[i], Modelo.g_sinal, Modelo.g_limite)
 
-      if not geraca_inicial:
-         Modelo.Individuo_Avaliado(gen_no, i, individuo[i], function_objective[i], function_constraint[i], function_objective_penalizado[i], function_viavel[i])
+def Avalia_Individuo_Geral(individuo, i, gen_no, geraca_inicial = False):
+   vetor_x = individuo[i]
+   n = historico.procurar_individuo(vetor_x)
+
+   # Histórico
+   if n > -1:
+      vetor_x, objetivo, constraint, objective_penalizado, viavel = historico.retornar_individuo(n)
+      cont_analise_historico[0] += 1
+
+      return objetivo, constraint, objective_penalizado, viavel
       
+   viavel_x = Viabilidade_Explicita(vetor_x)
+   pre_check_viavel = Modelo.pre_checagem(vetor_x)
+   
+   # Inviável
+   if ((viavel_x == constantes.solucao_inviavel) or (pre_check_viavel == constantes.solucao_inviavel)):
+      objetivo, constraint = Avalia_Individuo_NãoViavel()
+      objective_penalizado = objetivo
+      viavel = constantes.solucao_inviavel 
+      cont_analise_pre_check[0] +=1
+
+      return objetivo, constraint, objective_penalizado, viavel
+
+   # Indivíduo Novo
+   objetivo, constraint = Modelo.Avalia_Individuo_Viavel(individuo, i, gen_no)    
+   objective_penalizado = Penalizacao(objetivo, constraint, Modelo.g_sinal, Modelo.g_limite, Modelo.f_pen)
+   viavel = Checa_viavel(vetor_x, constraint, Modelo.g_sinal, Modelo.g_limite)
+
+   if not geraca_inicial:
+      Modelo.Individuo_Avaliado(gen_no, i, vetor_x, objetivo, constraint, objective_penalizado, viavel)
+   
+   cont_analise_nova[0] += 1
+   historico.adicionar_individuo(vetor_x, objetivo, constraint, objective_penalizado, viavel)
+   
+   return objetivo, constraint, objective_penalizado, viavel
+
+def Avaliar_Pop(individuo, gen_no, geraca_inicial = False):
+   function_objective = []
+   function_constraint = []
+   function_viavel = []
+   function_objective_penalizado = []
+
+   for i in range(0, len(individuo)):
+      objetivo, constraint, objective_penalizado, viavel = Avalia_Individuo_Geral(individuo, i, gen_no, geraca_inicial) 
+      function_objective.append(objetivo)
+      function_constraint.append(constraint)
+      function_objective_penalizado.append(objective_penalizado)
+      function_viavel.append(viavel)
+
    return function_objective, function_constraint, function_objective_penalizado, function_viavel
 
 def limpa_populacao_inviavel(populacao, function_viavel):
@@ -233,33 +272,49 @@ def limpa_populacao_inviavel(populacao, function_viavel):
       if function_viavel[i] == 1:
          del populacao[i]
          del function_viavel[i]
-         print (f"Removido individuo {i}")
+
+         # print (f"Removido individuo {i}")
+
    return populacao
 
 def Completa_PopInicial(pop_new):
-   continua = True
+   pop_fake = []
+
+   while(len(pop_new) < Modelo.pop_size):
+      pop_new.append(criar_individuo_random(Modelo.x_min, Modelo.x_max))
+
+   pop_new = arredondarpop(pop_new, Modelo.x_res)
+   function_objective, function_constraint, function_objective_penalizado, function_viavel = Avaliar_Pop(pop_new, -1, True)        
+   continua = sum(function_viavel)/len(function_viavel) > (1 - Modelo.porcentagem_viavel_primeira_geracao)
+   if not continua:
+      return pop_new
+      
    while continua:
-      while(len(pop_new) < Modelo.pop_size):
+      pop_new = limpa_populacao_inviavel(pop_new, function_viavel)
+      pop_fake = pop_fake + pop_new
+      pop_new = []
+
+      while((len(pop_fake)+len(pop_new)) < Modelo.pop_size):
          pop_new.append(criar_individuo_random(Modelo.x_min, Modelo.x_max))
       pop_new = arredondarpop(pop_new, Modelo.x_res)
       function_objective, function_constraint, function_objective_penalizado, function_viavel = Avaliar_Pop(pop_new, -1, True)        
-      continua = sum(function_viavel)/len(function_viavel) > (1 - Modelo.porcentagem_viavel_primeira_geracao)
-      
-      if continua:
-         pop_new = limpa_populacao_inviavel(pop_new, function_viavel)
-      
-   return pop_new
+
+      continua = ((len(function_viavel) - sum(function_viavel) + len(pop_fake))/Modelo.pop_size) < Modelo.porcentagem_viavel_primeira_geracao
+
+   return pop_fake + pop_new
 
 def Evolucao(pop_new):
    pop_new = Completa_PopInicial(pop_new)
    for gen_no in range (0, Modelo.max_gen):
-      Modelo.Nova_GeracaoIniciada(gen_no, pop_new)
+      Modelo.Geracao_Iniciada(gen_no, pop_new)
       individuo = pop_new[:]
       filhos = evoluir(individuo, Modelo.x_min, Modelo.x_max)
       individuo = Adicionar_Filhos(individuo, filhos)
-      function_objective, function_constraint, function_objective_penalizado, function_viavel = Avaliar_Pop(individuo, gen_no)        
-
-      rank = Rank_pop(function_objective_penalizado)
+      objetivos, constraints, objetivos_penalizados, viavel = Avaliar_Pop(individuo, gen_no)    
+          
+      Modelo.Geracao_Finalizada(gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel)
+      
+      rank = Rank_pop(objetivos_penalizados)
 
       new_solution = Elitismo(rank) # Retorna lista de indexes (os melhores)
 
