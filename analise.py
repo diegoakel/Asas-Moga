@@ -4,7 +4,11 @@ import math
 import inspect
 import subprocess as sp
 import Modelo
+import constantes
 class asa():
+    def __init__(self):
+        self.viavel = constantes.solucao_inviavel
+    
     def setar_geometria(self, B, cordas, offsets, alfa_stol = 13.5):
         self.envs = B
         self.B = (B[-1]*2)
@@ -77,11 +81,11 @@ class asa():
     def calc_massa(self):
         fator_corretivo = 1.09
         MTOW = ((self.W/self.g)/fator_corretivo) # MTOW em kg
-        massa_vazia = (1.539331*((self.S)**2)) + 1.341043*(self.S)
-        return (MTOW, massa_vazia)
+        self.massa_vazia = (1.539331*((self.S)**2)) + 1.341043*(self.S)
+        return (MTOW, self.massa_vazia)
 
     def salva_asa(self, geracao,n):
-        o  = open(f"../Banco_asas/asas_todas8/geracao_{geracao}_individuo{n}.avl", "w")
+        o  = open(f"../Banco_asas/asas_todas9/geracao_{geracao}_individuo{n}.avl", "w")
         o.write(" Urutau 2020 (2)\n" +
         "0.0                                 | Mach\n" +
         "0     0     0.0                     | iYsym  iZsym  Zsym\n"+
@@ -120,7 +124,8 @@ class asa():
         f"#{self.pontuacao} \n" +
         f"#{self.CL}00000 \n" +
         f"#{self.CD}00000 \n" +
-        f"#{self.massa_vazia}" 
+        f"#{self.massa_vazia} \n" +
+        f'#{self.viavel}'
         # 
         )
         o.close()

@@ -2,6 +2,7 @@ from random import uniform as random
 import pandas as pd
 import analise
 import constantes
+import historico
 
 # Parametros Ambientais
 g = 9.81
@@ -22,6 +23,7 @@ pop_size = 20
 taxa_mutacao = 0.04
 max_gen = 300
 porcentagem_viavel_primeira_geracao = 0.49
+tolerancia_nova_analise = 0
 
 #Modelo do problema
 no_objetivo = 1
@@ -59,7 +61,7 @@ def Avalia_Individuo_Viavel(individuo, n, gen_no):
    constraint.append(analise.delta_offset2(individuo[n]))
    constraint.append(analise.delta_offset3(individuo[n]))
 
-   objective.append(f_sinal[0] * analise.calcula_carga_paga(individuo[n],gen_no,n))
+   objective.append(f_sinal[0] * analise.calcula_carga_paga(individuo[n], gen_no, n))
 
    return objective, constraint
 
@@ -103,6 +105,12 @@ def Elitismo_Aplicado(rank, new_solution):
    # print("\nNS:", new_solution)
    pass
 
-def Nova_GeracaoIniciada(n, pop_new):
-   # print("\nGen nº:", n)
+def Geracao_Iniciada(gen_no, pop_new):
+   print(f"\nGeração {gen_no} iniciada.")
+
+   pass
+
+def Geracao_Finalizada(gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel):
+   
+   
    pass
