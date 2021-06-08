@@ -19,8 +19,9 @@ comprimento_pista_maxima = 90
 #parametro otimização
 pop_size = 20
 taxa_mutacao = 0.04
-max_gen = 300
+max_gen = 3
 porcentagem_viavel_primeira_geracao = 0.5
+tolerancia_nova_analise = 0
 
 #Modelo do problema
 no_objetivo = 1
@@ -32,7 +33,7 @@ x_min = [0.2, 0.2, 0.2, corda_fuselagem_minimo, 0, 0, 0, 0, 0 ,0]## x = deadrise
 x_max = [2, 2, 2, corda_fuselagem_maxima, 0.15, 0.15, 0.15, 0.25, 0.25, 0.25]
 f_sinal = [constantes.maximizar] # "-" é maximizar e "+" é minimizar
 f_pen = [1000, 10000, 10000, 10000] ## f1, f2
-g_limite = [envergadura_maxima, corda_ponta_minima, corda_minima, corda_minima] ## g1, g2
+g_limite = [envergadura_maxima, corda_minima, corda_minima, corda_ponta_minima] ## g1, g2
 g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que] ## negativo < lim; positivo > lim
 
 
@@ -55,6 +56,20 @@ def Avalia_Individuo_Viavel(individuo, n,gen_no):
 
    return objective, constraint
 
+def pre_checagem(vetor_x):
+   if analise.retorna_envergadura(vetor_x) > envergadura_maxima:
+      return constantes.solucao_inviavel
+
+   if analise.retorna_corda_1(vetor_x) < corda_minima:
+      return constantes.solucao_inviavel
+
+   if analise.retorna_corda_2(vetor_x) < corda_minima:
+      return constantes.solucao_inviavel
+
+   if analise.retorna_corda_ponta(vetor_x) < corda_ponta_minima:
+      return constantes.solucao_inviavel
+
+   return constantes.solucao_viavel
 
 def Individuo_Avaliado(gen_no, n, individuo, function_objective, function_constraint, function_objective_penalizado, function_viavel):
     analise.seta_viabilidade(function_viavel)
@@ -69,6 +84,9 @@ def Elitismo_Aplicado(rank, new_solution):
    # print("\nNS:", new_solution)
    pass
 
-def Nova_GeracaoIniciada(n, pop_new):
-   # print("\nGen nº:", n)
+def Geracao_Iniciada(gen_no, pop_new):
+   print(f"\nGeração {gen_no} iniciada.")
+
+def Geracao_Finalizada(gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel):
    pass
+
