@@ -117,9 +117,10 @@ class asa():
         "%f    %f    0.0000    %f   0.000   13    1   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[2],  self.envs[2], self.cordas[3])+
         "AFIL 0.0 1.0\n" +
         "airfoil.dat \n" +
-        f"#{self.pontuacao}" +
-        f"#{self.CL}" +
-        f"#{self.CD}" 
+        f"#{self.pontuacao} \n" +
+        f"#{self.CL}00000 \n" +
+        f"#{self.CD}00000 \n" +
+        f"#{self.massa_vazia}" 
         # 
         )
         o.close()
