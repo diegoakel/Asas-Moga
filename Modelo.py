@@ -24,6 +24,7 @@ tolerancia_nova_analise = 0
 #Modelo do problema
 no_objetivo = 1
 no_restricoes = 4
+no_parameters = 4
 
 # Env1, Env2, Env3, Chord0, Chord1, Chord2, Chord3, offset1, offset2, offset3
 x_res = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
@@ -34,33 +35,46 @@ f_pen = [1000, 10000, 10000, 10000] ## f1, f2
 g_limite = [envergadura_maxima, corda_minima, corda_minima, corda_ponta_minima] ## g1, g2
 g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que] ## negativo < lim; positivo > lim
 
+# Labels
+nome_otimizacao = f"Relativo_{pop_size}_{max_gen}_MaxPontuacao"
 
-def Avalia_Individuo_Viavel(individuo, n,gen_no):
+
+def Avalia_Individuo_Viavel(individuo, n, gen_no):
    objective = []
    constraint = []
+   
+   constraint.append(analise.retorna_envergadura(*fake_x(individuo[n])))
+   constraint.append(analise.retorna_corda_1(*fake_x(individuo[n])))
+   constraint.append(analise.retorna_corda_2(*fake_x(individuo[n])))  
+   constraint.append(analise.retorna_corda_ponta(*fake_x(individuo[n])))
 
-   constraint.append(analise.retorna_envergadura(individuo[n]))
-   constraint.append(analise.retorna_corda_1(individuo[n]))
-   constraint.append(analise.retorna_corda_2(individuo[n]))   
-   constraint.append(analise.retorna_corda_ponta(individuo[n]))
+   objective.append(f_sinal[0] * analise.calcula_carga_paga(*fake_x(individuo[n])))
 
-   objetivo = f_sinal[0] * analise.calcula_carga_paga(individuo[n],gen_no,n)
-   objective.append(objetivo)
+   parameters = analise.retorna_parametros()
 
-   return objective, constraint
+   return objective, constraint, parameters
 
 
 def pre_checagem(vetor_x):
-   if analise.retorna_envergadura(vetor_x) > envergadura_maxima:
+   if analise.retorna_envergadura(*fake_x(vetor_x)) > envergadura_maxima:
       return constantes.solucao_inviavel
 
-   if analise.retorna_corda_1(vetor_x) < corda_minima:
+   if analise.retorna_corda_1(*fake_x(vetor_x)) < corda_minima:
       return constantes.solucao_inviavel
 
-   if analise.retorna_corda_2(vetor_x) < corda_minima:
+   if analise.retorna_corda_2(*fake_x(vetor_x)) < corda_minima:
       return constantes.solucao_inviavel
 
-   if analise.retorna_corda_ponta(vetor_x) < corda_ponta_minima:
+   if analise.retorna_corda_ponta(*fake_x(vetor_x)) < corda_ponta_minima:
       return constantes.solucao_inviavel
 
    return constantes.solucao_viavel
+
+
+def fake_x(vetor_x):
+   fake_env = [vetor_x[0], vetor_x[0]+ vetor_x[1], vetor_x[0] + vetor_x[1] + vetor_x[2]]
+   fake_corda = [vetor_x[3], vetor_x[3] - vetor_x[4], vetor_x[3] - vetor_x[4] - vetor_x[5], vetor_x[3]- vetor_x[4] - vetor_x[5] - vetor_x[6]]
+   fake_offset = [vetor_x[7], vetor_x[7] + vetor_x[8], vetor_x[7] + vetor_x[8] + vetor_x[9]]
+
+   return fake_env, fake_corda, fake_offset
+
