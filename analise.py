@@ -244,50 +244,39 @@ def calcula_carga_paga(real_env, real_corda, real_offset):
 
     return _asa.pontuacao
 
-def retorna_envergadura(vetor_x):
-    fake_env = [vetor_x[0],vetor_x[1],vetor_x[2]]
-    return (2*fake_env[2])
 
+def retorna_envergadura(real_env, real_corda, real_offset):
+    return (2 * real_env[2])
 
-def retorna_corda_1(vetor_x):
-    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
-    return fake_corda[1]
+def retorna_corda_1(real_env, real_corda, real_offset):
+    return real_corda[1]
 
-def retorna_corda_2(vetor_x):
-    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
-    return fake_corda[2]
+def retorna_corda_2(real_env, real_corda, real_offset):
+    return real_corda[2]
 
-def retorna_corda_ponta(vetor_x):
-    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
-    return fake_corda[3]
+def retorna_corda_ponta(real_env, real_corda, real_offset):
+    return real_corda[3]
 
-def retorna_delta_envergadura_2(vetor_x):
-    fake_env = [vetor_x[0],vetor_x[1],vetor_x[2]]
-    return (fake_env[1]- fake_env[0])
+def retorna_delta_envergadura_2(real_env, real_corda, real_offset):
+    return (real_env[1]- real_env[0])
 
-def retorna_delta_envergadura_3(vetor_x):
-    fake_env = [vetor_x[0],vetor_x[1],vetor_x[2]]
-    return (fake_env[2]- fake_env[1])
+def retorna_delta_envergadura_3(real_env, real_corda, real_offset):
+    return (real_env[2]- real_env[1])
 
-def delta_corda_1(vetor_x):
-    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
-    return (fake_corda[1]-fake_corda[0])
+def delta_corda_1(real_env, real_corda, real_offset):
+    return (real_corda[1]-real_corda[0])
 
-def delta_corda_2(vetor_x):
-    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
-    return (fake_corda[2]-fake_corda[1])
+def delta_corda_2(real_env, real_corda, real_offset):
+    return (real_corda[2]-real_corda[1])
 
-def delta_corda_3(vetor_x):
-    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
-    return (fake_corda[3]-fake_corda[2])
+def delta_corda_3(real_env, real_corda, real_offset):
+    return (real_corda[3]-real_corda[2])
 
-def delta_offset2(vetor_x):
-    fake_offset = [vetor_x[7],vetor_x[8],vetor_x[9]]
-    return (fake_offset[1]-fake_offset[0])
+def delta_offset2(real_env, real_corda, real_offset):
+    return (real_offset[1]-real_offset[0])
 
-def delta_offset3(vetor_x):
-    fake_offset = [vetor_x[7],vetor_x[8],vetor_x[9]]
-    return (fake_offset[2]-fake_offset[1])
+def delta_offset3(real_env, real_corda, real_offset):
+    return (real_offset[2]-real_offset[1])
 
 def retorna_parametros():
     return parametros_temp

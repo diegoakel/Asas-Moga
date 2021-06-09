@@ -46,14 +46,14 @@ def Avalia_Individuo_Viavel(individuo, n, gen_no):
 
    objective.append(f_sinal[0] * analise.calcula_carga_paga(*fake_x(individuo[n])))
 
-   constraint.append(analise.retorna_envergadura(individuo[n]))
-   constraint.append(analise.retorna_delta_envergadura_2(individuo[n]))
-   constraint.append(analise.retorna_delta_envergadura_3(individuo[n]))
-   constraint.append(analise.delta_corda_1(individuo[n]))
-   constraint.append(analise.delta_corda_2(individuo[n]))
-   constraint.append(analise.delta_corda_3(individuo[n]))
-   constraint.append(analise.delta_offset2(individuo[n]))
-   constraint.append(analise.delta_offset3(individuo[n]))
+   constraint.append(analise.retorna_envergadura(*fake_x(individuo[n])))
+   constraint.append(analise.retorna_delta_envergadura_2(*fake_x(individuo[n])))
+   constraint.append(analise.retorna_delta_envergadura_3(*fake_x(individuo[n])))
+   constraint.append(analise.delta_corda_1(*fake_x(individuo[n])))
+   constraint.append(analise.delta_corda_2(*fake_x(individuo[n])))
+   constraint.append(analise.delta_corda_3(*fake_x(individuo[n])))
+   constraint.append(analise.delta_offset2(*fake_x(individuo[n])))
+   constraint.append(analise.delta_offset3(*fake_x(individuo[n])))
 
    parameters = analise.retorna_parametros()
 
@@ -61,28 +61,28 @@ def Avalia_Individuo_Viavel(individuo, n, gen_no):
 
 
 def pre_checagem(vetor_x):
-   if analise.retorna_envergadura(vetor_x) > envergadura_maxima:
+   if analise.retorna_envergadura(*fake_x(vetor_x)) > envergadura_maxima:
       return constantes.solucao_inviavel
 
-   if analise.retorna_delta_envergadura_2(vetor_x) < 0:
+   if analise.retorna_delta_envergadura_2(*fake_x(vetor_x)) < 0:
       return constantes.solucao_inviavel
    
-   if analise.retorna_delta_envergadura_3(vetor_x) < 0:
+   if analise.retorna_delta_envergadura_3(*fake_x(vetor_x)) < 0:
       return constantes.solucao_inviavel
 
-   if analise.delta_corda_1(vetor_x) < 0:
+   if analise.delta_corda_1(*fake_x(vetor_x)) < 0:
       return constantes.solucao_inviavel
    
-   if analise.delta_corda_2(vetor_x) < 0:
+   if analise.delta_corda_2(*fake_x(vetor_x)) < 0:
       return constantes.solucao_inviavel
 
-   if analise.delta_corda_3(vetor_x) < 0:
+   if analise.delta_corda_3(*fake_x(vetor_x)) < 0:
       return constantes.solucao_inviavel
    
-   if analise.delta_offset2(vetor_x) < 0:
+   if analise.delta_offset2(*fake_x(vetor_x)) < 0:
       return constantes.solucao_inviavel
 
-   if analise.delta_offset3(vetor_x) < 0:
+   if analise.delta_offset3(*fake_x(vetor_x)) < 0:
       return constantes.solucao_inviavel
 
    return constantes.solucao_viavel
