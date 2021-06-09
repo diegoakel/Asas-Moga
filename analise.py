@@ -5,6 +5,7 @@ import inspect
 import subprocess as sp
 import Modelo
 import constantes
+
 class asa():
     def __init__(self):
         self.viavel = constantes.solucao_inviavel
@@ -40,14 +41,14 @@ class asa():
     def coeficientes(self, angulo):
         coeficientes(self, angulo)
     
-    def lift (self, V, rho = 1.225 ):
+    def lift (self, V, rho = 1.225):
         return (self.rho*V**(2)*0.5*self.CL*self.S)
     
-    def drag (self, V, rho = 1.225 ):
+    def drag (self, V, rho = 1.225):
         return (self.rho*V**(2)*0.5*self.CD*self.S)
 
-    def mtow (self, rho = 1.225, coeficientes = (-0.0126, -0.5248, 40.0248)):
-        return  mtow(self, rho, coeficientes)
+    def mtow (self, rho = 1.225, a = -0.0126, b = -0.5248, c = 40.0248):
+        return  mtow(self, rho, a, b, c)
            
     def calc_pontuacao (self):
         self.MTOW = self.calc_massa()[0]
@@ -85,7 +86,7 @@ class asa():
         return (MTOW, self.massa_vazia)
 
     def salva_asa(self, geracao,n):
-        o  = open(f"../Banco_asas/asas_todas9_relativo/geracao_{geracao}_individuo{n}.avl", "w")
+        o  = open(f"../Banco_asas/asas_todas11/geracao_{geracao}_individuo{n}.avl", "w")
         o.write(" Urutau 2020 (2)\n" +
         "0.0                                 | Mach\n" +
         "0     0     0.0                     | iYsym  iZsym  Zsym\n"+
@@ -183,15 +184,6 @@ def file_and_commands(self, alfa_stol): # Não mexer nisso~
     "quit")
     commands.close()
 
-# def Popen(*args, **kwargs):
-#     sig = inspect.signature(real_popen)
-#     bound_args = sig.bind(*args, **kwargs).arguments
-#     bound_args['stdout'] = subprocess.DEVNULL
-#     bound_args['stderr'] = subprocess.DEVNULL
-#     return real_popen(**bound_args)
-
-# real_popen = subprocess.Popen
-# subprocess.Popen = Popen
 
 def coeficientes(self, angulo):
     
@@ -199,15 +191,6 @@ def coeficientes(self, angulo):
 
     run_avl_command = 'avl.exe<' + 'comandos.avl'
     os.popen(run_avl_command).read()
-
-    # avl = sp.Popen(['avl.exe'],
-    #     stdin=sp.PIPE,stdout=None, 
-    #     stderr=None, 
-    #     universal_newlines=True)
-    # avl.stdin.write("comandos.avl" +'\n')
-    # avl.communicate('comandos.avl')
-    # sp.Popen(['avl.exe', "comandos.avl"])
-
 
     results = (open("resultado.txt")).readlines()
     coefficients = []
@@ -228,11 +211,7 @@ def coeficientes(self, angulo):
             arquivo = file
             os.remove(arquivo)
 
-def mtow(self, rho, coeficientes):
-    a = coeficientes[0]
-    b = coeficientes[1]
-    c = coeficientes[2]
-    
+def mtow(self, rho, a, b, c):    
     for k in range (0, 270):
         if (self.CL == 0) or (self.S < 0):
             Slo = 2*self.pista_total
@@ -241,8 +220,8 @@ def mtow(self, rho, coeficientes):
             W = (k/(9)) * self.g
             V = math.sqrt((2*W)/(self.rho*self.S*self.CL)) * 1.2 * 0.7
             T = a*((V*0.7)**2)+b*(V*0.7)+c
-            D = self.drag(V) #self.rho*V**(2)*0.5*self.CD*self.S
-            L = self.lift(V) #self.rho*V**(2)*0.5*self.CL*self.S
+            D = self.drag(V) 
+            L = self.lift(V)
             Slo = round((1.44*(W)**(2))/(self.g*self.rho*self.S*self.CL*(T-(D+self.mi*(W-L)))), 2)
         
         if Slo > self.pista_total:
@@ -251,60 +230,64 @@ def mtow(self, rho, coeficientes):
     self.W = W # MTOW em Newton
     return W
 
-def calcula_carga_paga(x,gen_no,n):
-    fake_env = [x[0],x[1],x[2]]
-    fake_corda = [x[3],x[4],x[5],x[6]]
-    fake_offset = [x[7], x[8], x[9]]
-
-    _asa.setar_geometria(fake_env,fake_corda, fake_offset)
+def calcula_carga_paga(real_env, real_corda, real_offset):
+    _asa.setar_geometria(real_env, real_corda, real_offset)
     _asa.analisa()
-    _asa.salva_asa(gen_no,n)
+    # _asa.salva_asa(gen_no,n)
     
+    global parametros_temp
+    parametros_temp = []
+    parametros_temp.append(_asa.S)
+    parametros_temp.append(_asa.CL)
+    parametros_temp.append(_asa.CD)
+    parametros_temp.append(_asa.massa_vazia)
+
     return _asa.pontuacao
 
-def seta_viabilidade(viavel):
-    _asa.viavel = viavel
-
-def retorna_envergadura(x):
-    fake_env = [x[0],x[1],x[2]]
+def retorna_envergadura(vetor_x):
+    fake_env = [vetor_x[0],vetor_x[1],vetor_x[2]]
     return (2*fake_env[2])
 
-def retorna_corda_1(x):
-    fake_corda = [x[3],x[4],x[5],x[6]]
+
+def retorna_corda_1(vetor_x):
+    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
     return fake_corda[1]
 
-def retorna_corda_2(x):
-    fake_corda = [x[3],x[4],x[5],x[6]]
+def retorna_corda_2(vetor_x):
+    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
     return fake_corda[2]
 
-def retorna_corda_ponta(x):
-    fake_corda = [x[3],x[4],x[5],x[6]]
+def retorna_corda_ponta(vetor_x):
+    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
     return fake_corda[3]
 
-def retorna_delta_envergadura_2(x):
-    fake_env = [x[0],x[1],x[2]]
+def retorna_delta_envergadura_2(vetor_x):
+    fake_env = [vetor_x[0],vetor_x[1],vetor_x[2]]
     return (fake_env[1]- fake_env[0])
 
-def retorna_delta_envergadura_3(x):
-    fake_env = [x[0],x[1],x[2]]
+def retorna_delta_envergadura_3(vetor_x):
+    fake_env = [vetor_x[0],vetor_x[1],vetor_x[2]]
     return (fake_env[2]- fake_env[1])
 
-def delta_corda_1(x):
-    fake_corda = [x[3],x[4],x[5],x[6]]
+def delta_corda_1(vetor_x):
+    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
     return (fake_corda[1]-fake_corda[0])
 
-def delta_corda_2(x):
-    fake_corda = [x[3],x[4],x[5],x[6]]
+def delta_corda_2(vetor_x):
+    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
     return (fake_corda[2]-fake_corda[1])
 
-def delta_corda_3(x):
-    fake_corda = [x[3],x[4],x[5],x[6]]
+def delta_corda_3(vetor_x):
+    fake_corda = [vetor_x[3],vetor_x[4],vetor_x[5],vetor_x[6]]
     return (fake_corda[3]-fake_corda[2])
 
-def delta_offset2(x):
-    fake_offset = [x[7],x[8],x[9]]
+def delta_offset2(vetor_x):
+    fake_offset = [vetor_x[7],vetor_x[8],vetor_x[9]]
     return (fake_offset[1]-fake_offset[0])
 
-def delta_offset3(x):
-    fake_offset = [x[7],x[8],x[9]]
+def delta_offset3(vetor_x):
+    fake_offset = [vetor_x[7],vetor_x[8],vetor_x[9]]
     return (fake_offset[2]-fake_offset[1])
+
+def retorna_parametros():
+    return parametros_temp
