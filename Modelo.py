@@ -1,10 +1,6 @@
-from random import uniform as random
-import pandas as pd
 import analise
 import constantes
-import historico
-import pandas as pd
-from numpy import inf
+
 
 # Parametros Ambientais
 g = 9.81
@@ -23,13 +19,14 @@ comprimento_pista_maxima = 90
 #parametro otimização
 pop_size = 20
 taxa_mutacao = 0.04
-max_gen = 300
+max_gen = 3
 porcentagem_viavel_primeira_geracao = 0.49
 tolerancia_nova_analise = 0
 
 #Modelo do problema
 no_objetivo = 1
 no_restricoes = 8
+no_parameters = 4
 
 # Env1, Env2, Env3, Chord0, Chord1, Chord2, Chord3, offset1, offset2, offset3
 x_res = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
@@ -40,32 +37,28 @@ f_pen = [1000, 10000, 10000, 10000, 10000, 10000, 10000, 10000] ## f1, f2
 g_limite = [envergadura_maxima, 0, 0, 0, 0, 0, 0, 0] ## g1, g2
 g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que] ## negativo < lim; positivo > lim
 
-
-
-def Evolucao_completada(pop_new):
-   print("FINAL")
-#    for i in range(0, pop_size):
-#         print("Envergadura:", pop_new[i][0] , pop_new[i][1], pop_new[i][2],"Cordas:", pop_new[i][3],pop_new[i][4],pop_new[i][5],pop_new[i][6],"Offsets:",pop_new[i][7],pop_new[i][8],pop_new[i][9])
+# Labels
+nome_otimizacao = f"Absoluto_{pop_size}_{max_gen}_MaxPontuacao"
 
 def Avalia_Individuo_Viavel(individuo, n, gen_no):
    objective = []
    constraint = []
 
-   constraint.append(analise.retorna_envergadura(individuo[n]))
+   objective.append(f_sinal[0] * analise.calcula_carga_paga(*fake_x(individuo[n])))
 
+   constraint.append(analise.retorna_envergadura(individuo[n]))
    constraint.append(analise.retorna_delta_envergadura_2(individuo[n]))
    constraint.append(analise.retorna_delta_envergadura_3(individuo[n]))
-
    constraint.append(analise.delta_corda_1(individuo[n]))
    constraint.append(analise.delta_corda_2(individuo[n]))
    constraint.append(analise.delta_corda_3(individuo[n]))
-
    constraint.append(analise.delta_offset2(individuo[n]))
    constraint.append(analise.delta_offset3(individuo[n]))
 
-   objective.append(f_sinal[0] * analise.calcula_carga_paga(individuo[n], gen_no, n))
+   parameters = analise.retorna_parametros()
 
-   return objective, constraint
+   return objective, constraint, parameters
+
 
 def pre_checagem(vetor_x):
    if analise.retorna_envergadura(vetor_x) > envergadura_maxima:
@@ -94,29 +87,9 @@ def pre_checagem(vetor_x):
 
    return constantes.solucao_viavel
 
-def Individuo_Avaliado(gen_no, n, individuo, function_objective, function_constraint, function_objective_penalizado, function_viavel):
-    analise.seta_viabilidade(function_viavel)
-   #  print("Envergadura: ", individuo[0] , individuo[1], individuo[2],"Cordas:", individuo[3],individuo[4],individuo[5],individuo[6],"Offsets:",individuo[7],individuo[8],individuo[9])
-   #  print("Pontuacao penalizada: ", function_objective_penalizado[0])  
-   #  print("Pontuacao: ", function_objective[0])   
-   #  print("Inviavel: ", function_viavel)   
-    pass
+def fake_x(vetor_x):
+   fake_env = [vetor_x[0], vetor_x[1], vetor_x[2]]
+   fake_corda = [vetor_x[3], vetor_x[4], vetor_x[5], vetor_x[6]]
+   fake_offset = [vetor_x[7], vetor_x[8], vetor_x[9]]
 
-def Elitismo_Aplicado(rank, new_solution):
-   # print("\nrank:", rank)
-   # print("\nNS:", new_solution)
-   pass
-
-def Geracao_Iniciada(gen_no, pop_new):
-   print(f"\nGeração {gen_no} iniciada.")
-
-   pass
-
-df =  pd.DataFrame(columns=["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel"])
-def Geracao_Finalizada(gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel):
-   global df
-   dados = [gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel]
-   df2 = pd.DataFrame(dados).T
-   df2.columns=["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel"]
-   df = pd.concat([df, df2])
-   df.to_csv("absoluto_300_20.csv")
+   return fake_env, fake_corda, fake_offset

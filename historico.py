@@ -6,14 +6,15 @@ historico_objetivo = []
 historico_constraint = []
 historico_objective_penalizado = []
 historico_viavel = []
+historico_parameters = []
 
-def adicionar_individuo(vetor_x, function_objective, function_constraint, function_objective_penalizado, function_viavel):
+def adicionar_individuo(vetor_x, objective, constraint, objective_penalizado, viavel, parameters):
     historico_vetor_x.append(vetor_x)
-    historico_objetivo.append(function_objective)
-    historico_constraint.append(function_constraint)
-    historico_objective_penalizado.append(function_objective_penalizado)
-    historico_viavel.append(function_viavel)
-
+    historico_objetivo.append(objective)
+    historico_constraint.append(constraint)
+    historico_objective_penalizado.append(objective_penalizado)
+    historico_viavel.append(viavel)
+    historico_parameters.append(parameters)
 
 def calcular_distancia(vetor_x1, vetor_x2):
     soma = 0
@@ -32,4 +33,4 @@ def procurar_individuo(vetor_x):
         
 
 def retornar_individuo(n):
-    return historico_vetor_x[n], historico_objetivo[n], historico_constraint[n], historico_objective_penalizado[n], historico_viavel[n]
+    return historico_vetor_x[n], historico_objetivo[n], historico_constraint[n], historico_objective_penalizado[n], historico_viavel[n], historico_parameters[n]
