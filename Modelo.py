@@ -3,6 +3,8 @@ import pandas as pd
 import analise
 import constantes
 import historico
+import pandas as pd
+from numpy import inf
 
 # Parametros Ambientais
 g = 9.81
@@ -110,7 +112,11 @@ def Geracao_Iniciada(gen_no, pop_new):
 
    pass
 
+df =  pd.DataFrame(columns=["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel"])
 def Geracao_Finalizada(gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel):
-   
-   
-   pass
+   global df
+   dados = [gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel]
+   df2 = pd.DataFrame(dados).T
+   df2.columns=["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel"]
+   df = pd.concat([df, df2])
+   df.to_csv("absoluto_300_20.csv")
