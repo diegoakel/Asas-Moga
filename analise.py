@@ -85,7 +85,7 @@ class asa():
         return (MTOW, self.massa_vazia)
 
     def salva_asa(self, geracao,n):
-        o  = open(f"../Banco_asas/asas_todas9/geracao_{geracao}_individuo{n}.avl", "w")
+        o  = open(f"../Banco_asas/asas_todas10/geracao_{geracao}_individuo{n}.avl", "w")
         o.write(" Urutau 2020 (2)\n" +
         "0.0                                 | Mach\n" +
         "0     0     0.0                     | iYsym  iZsym  Zsym\n"+
