@@ -2,6 +2,8 @@ from random import uniform as random
 import pandas as pd
 import analise
 import constantes
+import pandas as pd
+from numpy import inf
 
 # Parametros Ambientais
 g = 9.81
@@ -37,11 +39,11 @@ g_limite = [envergadura_maxima, corda_minima, corda_minima, corda_ponta_minima] 
 g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que] ## negativo < lim; positivo > lim
 
 
-
 def Evolucao_completada(pop_new):
    print("FINAL")
 #    for i in range(0, pop_size):
 #         print("Envergadura:", pop_new[i][0] , pop_new[i][1], pop_new[i][2],"Cordas:", pop_new[i][3],pop_new[i][4],pop_new[i][5],pop_new[i][6],"Offsets:",pop_new[i][7],pop_new[i][8],pop_new[i][9])
+
 
 def Avalia_Individuo_Viavel(individuo, n,gen_no):
    objective = []
@@ -52,9 +54,11 @@ def Avalia_Individuo_Viavel(individuo, n,gen_no):
    constraint.append(analise.retorna_corda_2(individuo[n]))   
    constraint.append(analise.retorna_corda_ponta(individuo[n]))
 
-   objective.append(f_sinal[0] * analise.calcula_carga_paga(individuo[n],gen_no,n))
+   objetivo = f_sinal[0] * analise.calcula_carga_paga(individuo[n],gen_no,n)
+   objective.append(objetivo)
 
    return objective, constraint
+
 
 def pre_checagem(vetor_x):
    if analise.retorna_envergadura(vetor_x) > envergadura_maxima:
@@ -71,6 +75,7 @@ def pre_checagem(vetor_x):
 
    return constantes.solucao_viavel
 
+
 def Individuo_Avaliado(gen_no, n, individuo, function_objective, function_constraint, function_objective_penalizado, function_viavel):
     analise.seta_viabilidade(function_viavel)
    #  print("Envergadura: ", individuo[0] , individuo[1], individuo[2],"Cordas:", individuo[3],individuo[4],individuo[5],individuo[6],"Offsets:",individuo[7],individuo[8],individuo[9])
@@ -79,14 +84,22 @@ def Individuo_Avaliado(gen_no, n, individuo, function_objective, function_constr
    #  print("Inviavel: ", function_viavel)   
     pass
 
+
 def Elitismo_Aplicado(rank, new_solution):
    # print("\nrank:", rank)
    # print("\nNS:", new_solution)
    pass
 
+
 def Geracao_Iniciada(gen_no, pop_new):
    print(f"\nGeração {gen_no} iniciada.")
 
-def Geracao_Finalizada(gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel):
-   pass
 
+df =  pd.DataFrame(columns=["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel"])
+def Geracao_Finalizada(gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel):
+   global df
+   dados = [gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel]
+   df2 = pd.DataFrame(dados).T
+   df2.columns=["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel"]
+   df = pd.concat([df, df2])
+   df.to_csv("relativo_300_20.csv")
