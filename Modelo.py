@@ -12,7 +12,11 @@ corda_ponta_minima = 0.05
 corda_minima = 0.05
 corda_fuselagem_maxima = 1
 corda_fuselagem_minimo = 0.1
+
+# Parâmetros de análise
 comprimento_pista_maxima = 90
+comprimento_elemento_env = 0.05 
+num_elementos_corda = 20
 
 #parametro otimização
 pop_size = 20
