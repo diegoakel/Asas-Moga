@@ -43,7 +43,7 @@ g_limite = [envergadura_maxima, delta_envergadura_minima, delta_envergadura_mini
 g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que] ## negativo < lim; positivo > lim
 
 # Labels
-nome_otimizacao = f"Absoluto_{pop_size}_{max_gen}_MaxPontuacao"
+nome_otimizacao = f"Absoluto_{pop_size}_{max_gen}_MaxPontuacao_R1"
 
 def Avalia_Individuo_Viavel(individuo, n, gen_no):
    objective = []
