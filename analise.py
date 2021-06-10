@@ -134,6 +134,9 @@ class asa():
 _asa = asa()
 
 def file_and_commands(self, alfa_stol): # Não mexer nisso~
+    num_p1 =  math.ceil(self.envs[0]/Modelo.comprimento_elemento_env) -1
+    num_p2 =  math.ceil((self.envs[1]-self.envs[0])/Modelo.comprimento_elemento_env) -1
+    num_p3 =  math.ceil((self.envs[2]-self.envs[1])/Modelo.comprimento_elemento_env) -1
 
     o  = open("asa.avl", "w")
     o.write(" Urutau 2020 (2)\n" +
@@ -144,7 +147,7 @@ def file_and_commands(self, alfa_stol): # Não mexer nisso~
     "0.00                               | CDp  (optional)\n"+
     "SURFACE                      | (keyword)\n"+
     "Main Wing\n"+
-    "11        1.0\n"+
+    f"{Modelo.num_elementos_corda}        1.0\n"+
     "INDEX                        | (keyword)\n"+
     "1814                         | Lsurf\n"+
     "YDUPLICATE\n"+
@@ -156,19 +159,19 @@ def file_and_commands(self, alfa_stol): # Não mexer nisso~
     "ANGLE\n"+
     "0.000                         | dAinc\n"+
     "SECTION                                              |  (keyword)\n"+
-    "0.0000    0.0000    0.0000    %f   0.000    8    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %(self.cordas[0])+
+    f"0.0000    0.0000    0.0000    %f   0.000    {num_p1}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %(self.cordas[0])+
     "AFIL 0.0 1.0\n"+
     "airfoil.dat\n"+
     "SECTION                                                     |  (keyword)\n" +
-    "%f    %f    0.0000    %f   0.000    8    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[0],  self.envs[0], self.cordas[1])+
+    f"%f    %f    0.0000    %f   0.000    {num_p2}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[0],  self.envs[0], self.cordas[1])+
     "AFIL 0.0 1.0\n"+
     "airfoil.dat\n"+
     "SECTION                                                     |  (keyword)\n" +
-    "%f   %f    0.0000    %f   0.000   13    1   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[1],  self.envs[1], self.cordas[2])+
+    f"%f   %f    0.0000    %f   0.000   {num_p3}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[1],  self.envs[1], self.cordas[2])+
     "AFIL 0.0 1.0\n"+
     "airfoil.dat \n" +
     "SECTION                                                     |  (keyword)\n" +
-    "%f    %f    0.0000    %f   0.000   13    1   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[2],  self.envs[2], self.cordas[3])+
+    "%f    %f    0.0000    %f   0.000   13    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[2],  self.envs[2], self.cordas[3])+
     "AFIL 0.0 1.0\n" +
     "airfoil.dat \n")
     o.close()

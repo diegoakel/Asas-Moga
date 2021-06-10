@@ -8,15 +8,20 @@ rho_ar = 1.225
 mi_solo = 0.025
 
 # Parametros do problema
+delta_envergadura_minima = 0.3
 envergadura_maxima = 4.2
 corda_ponta_minima = 0.05
 corda_minima = 0.05
 corda_maxima = 1
 corda_fuselagem_maxima = 1
 corda_fuselagem_minimo = 0.1
-comprimento_pista_maxima = 90
 
-#parametro otimização
+# Parâmetros de análise
+comprimento_elemento_env = 0.05 
+comprimento_pista_maxima = 90
+num_elementos_corda = 20
+
+# Parametro otimização
 pop_size = 20
 taxa_mutacao = 0.04
 max_gen = 300
@@ -30,11 +35,11 @@ no_parameters = 4
 
 # Env1, Env2, Env3, Chord0, Chord1, Chord2, Chord3, offset1, offset2, offset3
 x_res = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-x_min = [0.2, 0.4, 0.6, corda_fuselagem_minimo, corda_minima, corda_minima, corda_minima, 0, 0 ,0]## x = deadrise, LCG
+x_min = [delta_envergadura_minima, 2*delta_envergadura_minima, 3*delta_envergadura_minima, corda_fuselagem_minimo, corda_minima, corda_minima, corda_minima, 0, 0 ,0]## x = deadrise, LCG
 x_max = [2, 2.2, 2.4, corda_fuselagem_maxima, corda_maxima, corda_maxima, corda_maxima, 0.25, 0.5, 0.75]
 f_sinal = [constantes.maximizar] # "-" é maximizar e "+" é minimizar
 f_pen = [1000, 10000, 10000, 10000, 10000, 10000, 10000, 10000] ## f1, f2
-g_limite = [envergadura_maxima, 0, 0, 0, 0, 0, 0, 0] ## g1, g2
+g_limite = [envergadura_maxima, delta_envergadura_minima, delta_envergadura_minima, 0, 0, 0, 0, 0] ## g1, g2
 g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que] ## negativo < lim; positivo > lim
 
 # Labels
