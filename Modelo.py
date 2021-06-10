@@ -7,6 +7,7 @@ rho_ar = 1.225
 mi_solo = 0.025
 
 # Parametros do problema
+delta_envergadura_minima = 0.3
 envergadura_maxima = 4.2
 corda_ponta_minima = 0.05
 corda_minima = 0.05
@@ -32,7 +33,7 @@ no_parameters = 4
 
 # Env1, Env2, Env3, Chord0, Chord1, Chord2, Chord3, offset1, offset2, offset3
 x_res = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-x_min = [0.2, 0.2, 0.2, corda_fuselagem_minimo, 0, 0, 0, 0, 0 ,0]## x = deadrise, LCG
+x_min = [delta_envergadura_minima, delta_envergadura_minima, delta_envergadura_minima, corda_fuselagem_minimo, 0, 0, 0, 0, 0 ,0]## x = deadrise, LCG
 x_max = [2, 2, 2, corda_fuselagem_maxima, 0.15, 0.15, 0.15, 0.25, 0.25, 0.25]
 f_sinal = [constantes.maximizar] # "-" é maximizar e "+" é minimizar
 f_pen = [1000, 10000, 10000, 10000] ## f1, f2
