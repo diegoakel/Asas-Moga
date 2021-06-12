@@ -1,6 +1,6 @@
+  
 import analise
 import constantes
-
 
 # Parametros Ambientais
 g = 9.81
@@ -37,10 +37,10 @@ no_parameters = 4
 x_res = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
 x_min = [delta_envergadura_minima, 2*delta_envergadura_minima, 3*delta_envergadura_minima, corda_fuselagem_minimo, corda_minima, corda_minima, corda_minima, 0, 0 ,0]## x = deadrise, LCG
 x_max = [2, 2.2, 2.4, corda_fuselagem_maxima, corda_maxima, corda_maxima, corda_maxima, 0.25, 0.5, 0.75]
-f_sinal = [constantes.maximizar] # "-" é maximizar e "+" é minimizar
-f_pen = [1000, 10000, 10000, 10000, 10000, 10000, 10000, 10000] ## f1, f2
-g_limite = [envergadura_maxima, delta_envergadura_minima, delta_envergadura_minima, 0, 0, 0, 0, 0] ## g1, g2
-g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.maior_que] ## negativo < lim; positivo > lim
+f_sinal = [constantes.maximizar]
+f_pen = [1000, 10000, 10000, 10000, 10000, 10000, 10000, 10000] 
+g_limite = [envergadura_maxima, delta_envergadura_minima, delta_envergadura_minima, 0, 0, 0, 0, 0]
+g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.menor_que, constantes.menor_que, constantes.menor_que, constantes.maior_que, constantes.maior_que] 
 
 # Labels
 nome_otimizacao = f"Absoluto_{pop_size}_{max_gen}_MaxPontuacao_R1"
@@ -69,19 +69,19 @@ def pre_checagem(vetor_x):
    if analise.retorna_envergadura(*fake_x(vetor_x)) > envergadura_maxima:
       return constantes.solucao_inviavel
 
-   if analise.retorna_delta_envergadura_2(*fake_x(vetor_x)) < 0:
+   if analise.retorna_delta_envergadura_2(*fake_x(vetor_x)) < delta_envergadura_minima:
       return constantes.solucao_inviavel
    
-   if analise.retorna_delta_envergadura_3(*fake_x(vetor_x)) < 0:
+   if analise.retorna_delta_envergadura_3(*fake_x(vetor_x)) < delta_envergadura_minima:
       return constantes.solucao_inviavel
 
-   if analise.delta_corda_1(*fake_x(vetor_x)) < 0:
+   if analise.delta_corda_1(*fake_x(vetor_x)) > 0:
       return constantes.solucao_inviavel
    
-   if analise.delta_corda_2(*fake_x(vetor_x)) < 0:
+   if analise.delta_corda_2(*fake_x(vetor_x)) > 0:
       return constantes.solucao_inviavel
 
-   if analise.delta_corda_3(*fake_x(vetor_x)) < 0:
+   if analise.delta_corda_3(*fake_x(vetor_x)) > 0:
       return constantes.solucao_inviavel
    
    if analise.delta_offset2(*fake_x(vetor_x)) < 0:
