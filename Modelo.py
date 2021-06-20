@@ -1,5 +1,7 @@
+from os import environ
 import analise
 import constantes
+import numpy as np
 
 # Parametros Ambientais
 g = 9.81
@@ -23,7 +25,7 @@ a = -0.0126
 b = -0.5248
 c = 40.0248
 alfa_stol = 13.5
-
+grau_interpolacao = 3
 
 # Parametro otimização
 pop_size = 20
@@ -82,3 +84,16 @@ def fake_x(vetor_x):
    fake_offset = [0, 0, 0]
 
    return fake_env, fake_corda, fake_offset
+
+def calcula_secoes(vetor_x, vetor_y):
+   x = np.array([0, vetor_x[0], vetor_x[1], vetor_x[2]])
+   y = np.array([vetor_y[0], vetor_y[1], vetor_y[2], vetor_y[3]])
+   z = np.polyfit(x, y, grau_interpolacao)
+   return z
+
+def calcula_corda(env_x, coef_interpolation):
+   if grau_interpolacao == 2:
+      return coef_interpolation[0]*env_x**2 + coef_interpolation[1]*env_x + coef_interpolation[2]
+   
+   if grau_interpolacao == 3:
+      return coef_interpolation[0]*env_x**3 + coef_interpolation[1]*env_x**2 + coef_interpolation[2]*env_x + coef_interpolation[3]
