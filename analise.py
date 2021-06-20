@@ -10,7 +10,7 @@ class asa():
     def __init__(self):
         self.viavel = constantes.solucao_inviavel
     
-    def setar_geometria(self, B, cordas, offsets, alfa_stol = 13.5):
+    def setar_geometria(self, B, cordas, offsets):
         self.envs = B
         self.B = (B[-1]*2)
         self.offsets = offsets
@@ -27,28 +27,24 @@ class asa():
         self.AR = self.B**2/self.S
         self.afil = cordas[-1]/cordas[0]
         self.mac = ( cordas[0]*(2/3)* ((1+self.afil+self.afil**2)/(1+self.afil)))
-        self.alfa_stol = alfa_stol
 
         # Valores que não são da aeronave
-        self.g = Modelo.g
-        self.rho = Modelo.rho_ar
-        self.mi = Modelo.mi_solo
         self.pista_total = Modelo.comprimento_pista_maxima
 
-    def file_and_commands(self, alfa_stol = 13.5): # Não mexer nisso~
-        file_and_commands(self,alfa_stol)
+    def file_and_commands(self): # Não mexer nisso~
+        file_and_commands(self)
         
-    def coeficientes(self, angulo):
-        coeficientes(self, angulo)
+    def coeficientes(self):
+        coeficientes(self)
     
-    def lift (self, V, rho = 1.225):
-        return (self.rho*V**(2)*0.5*self.CL*self.S)
+    def lift (self, V):
+        return (Modelo.rho_ar*V**(2)*0.5*self.CL*self.S)
     
-    def drag (self, V, rho = 1.225):
-        return (self.rho*V**(2)*0.5*self.CD*self.S)
+    def drag (self, V):
+        return (Modelo.rho_ar*V**(2)*0.5*self.CD*self.S)
 
-    def mtow (self, rho = 1.225, a = -0.0126, b = -0.5248, c = 40.0248):
-        return  mtow(self, rho, a, b, c)
+    def mtow (self):
+        return  mtow(self)
            
     def calc_pontuacao (self):
         self.MTOW = self.calc_massa()[0]
@@ -57,7 +53,7 @@ class asa():
        
     def analisa(self):
         # Calculos para situação de stol
-        self.coeficientes(self.alfa_stol)
+        self.coeficientes()
         self.mtow()
         self.calc_pontuacao()
 
@@ -81,59 +77,14 @@ class asa():
 
     def calc_massa(self):
         fator_corretivo = 1.09
-        MTOW = ((self.W/self.g)/fator_corretivo) # MTOW em kg
+        MTOW = ((self.W/Modelo.g)/fator_corretivo) # MTOW em kg
         self.massa_vazia = (1.539331*((self.S)**2)) + 1.341043*(self.S)
         return (MTOW, self.massa_vazia)
 
-    def salva_asa(self, geracao,n):
-        o  = open(f"../Banco_asas/asas_todas11/geracao_{geracao}_individuo{n}.avl", "w")
-        o.write(" Urutau 2020 (2)\n" +
-        "0.0                                 | Mach\n" +
-        "0     0     0.0                     | iYsym  iZsym  Zsym\n"+
-        "%f     %f     %f   | Sref   Cref   Bref\n" %(self.S, self.mac, self.B)+
-        "0.00000     0.00000     0.00000   | Xref   Yref   Zref\n"+
-        "0.00                               | CDp  (optional)\n"+
-        "SURFACE                      | (keyword)\n"+
-        "Main Wing\n"+
-        "11        1.0\n"+
-        "INDEX                        | (keyword)\n"+
-        "1814                         | Lsurf\n"+
-        "YDUPLICATE\n"+
-        "0.0\n"+
-        "SCALE\n"+
-        "1.0  1.0  1.0\n"+
-        "TRANSLATE\n"+
-        "0.0  0.0  0.0\n"+
-        "ANGLE\n"+
-        "0.000                         | dAinc\n"+
-        "SECTION                                              |  (keyword)\n"+
-        "0.0000    0.0000    0.0000    %f   0.000    8    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %(self.cordas[0])+
-        "AFIL 0.0 1.0\n"+
-        "airfoil.dat\n"+
-        "SECTION                                                     |  (keyword)\n" +
-        "%f    %f    0.0000    %f   0.000    8    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[0],  self.envs[0], self.cordas[1])+
-        "AFIL 0.0 1.0\n"+
-        "airfoil.dat\n"+
-        "SECTION                                                     |  (keyword)\n" +
-        "%f   %f    0.0000    %f   0.000   13    1   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[1],  self.envs[1], self.cordas[2])+
-        "AFIL 0.0 1.0\n"+
-        "airfoil.dat \n" +
-        "SECTION                                                     |  (keyword)\n" +
-        "%f    %f    0.0000    %f   0.000   13    1   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n" %( self.offsets[2],  self.envs[2], self.cordas[3])+
-        "AFIL 0.0 1.0\n" +
-        "airfoil.dat \n" +
-        f"#{self.pontuacao} \n" +
-        f"#{self.CL}00000 \n" +
-        f"#{self.CD}00000 \n" +
-        f"#{self.massa_vazia} \n" +
-        f'#{self.viavel}'
-        # 
-        )
-        o.close()
 
 _asa = asa()
 
-def file_and_commands(self, alfa_stol): # Não mexer nisso~
+def file_and_commands(self): # Não mexer nisso~
     num_p1 =  math.ceil(self.envs[0]/Modelo.comprimento_elemento_env) -1
     num_p2 =  math.ceil((self.envs[1]-self.envs[0])/Modelo.comprimento_elemento_env) -1
     num_p3 =  math.ceil((self.envs[2]-self.envs[1])/Modelo.comprimento_elemento_env) -1
@@ -180,7 +131,7 @@ def file_and_commands(self, alfa_stol): # Não mexer nisso~
     commands.write("load asa.avl\n"   +
     "oper\n" +
     "a\n" +
-    "a %f\n" %(alfa_stol) +
+    "a %f\n" %(Modelo.alfa_stol) +
     "x\n" +
     "ft\n" +
     "resultado.txt\n" +
@@ -188,9 +139,9 @@ def file_and_commands(self, alfa_stol): # Não mexer nisso~
     commands.close()
 
 
-def coeficientes(self, angulo):
+def coeficientes(self):
     
-    self.file_and_commands(angulo)
+    self.file_and_commands()
 
     run_avl_command = 'avl.exe<' + 'comandos.avl'
     os.popen(run_avl_command).read()
@@ -214,18 +165,18 @@ def coeficientes(self, angulo):
             arquivo = file
             os.remove(arquivo)
 
-def mtow(self, rho, a, b, c):    
+def mtow(self):    
     for k in range (0, 270):
         if (self.CL == 0) or (self.S < 0):
             Slo = 2*self.pista_total
             W = 0
         else:
-            W = (k/(9)) * self.g
-            V = math.sqrt((2*W)/(self.rho*self.S*self.CL)) * 1.2 * 0.7
-            T = a*((V*0.7)**2)+b*(V*0.7)+c
+            W = (k/(9)) * Modelo.g
+            V = math.sqrt((2*W)/(Modelo.rho_ar*self.S*self.CL)) * 1.2 * 0.7
+            T = Modelo.a*((V*0.7)**2)+Modelo.b*(V*0.7)+Modelo.c
             D = self.drag(V) 
             L = self.lift(V)
-            Slo = round((1.44*(W)**(2))/(self.g*self.rho*self.S*self.CL*(T-(D+self.mi*(W-L)))), 2)
+            Slo = round((1.44*(W)**(2))/(Modelo.g*Modelo.rho_ar*self.S*self.CL*(T-(D+Modelo.mi_solo*(W-L)))), 2)
         
         if Slo > self.pista_total:
             break    
