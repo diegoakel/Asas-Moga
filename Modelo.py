@@ -26,6 +26,7 @@ b = -0.5248
 c = 40.0248
 alfa_stol = 13.5
 grau_interpolacao = 3
+num_sections = 11
 
 # Parametro otimização
 pop_size = 20
@@ -37,7 +38,7 @@ tolerancia_nova_analise = 0
 #Modelo do problema
 no_objetivo = 1
 no_restricoes = 3
-no_parameters = 4
+no_parameters = 4 + num_sections + (grau_interpolacao + 1)
 
 # Env1, Env2, Env3, Chord0, Chord1, Chord2, Chord3
 x_res = [3, 3, 3, 3, 3, 3, 3]
@@ -49,7 +50,7 @@ g_limite = [envergadura_maxima, delta_envergadura_minima, delta_envergadura_mini
 g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que] 
 
 # Labels
-nome_otimizacao = f"Cobem_linear_{pop_size}_{max_gen}"
+nome_otimizacao = f"Cobem_poly_3_{pop_size}_{max_gen}"
 
 def Avalia_Individuo_Viavel(individuo, n, gen_no):
    objective = []
