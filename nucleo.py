@@ -5,11 +5,13 @@ import Moga_2020
 import time
 import interface
 import Modelo
+import analise
 
 interface.Otimizacao_Iniciada(Modelo.nome_otimizacao)
 
 inicio = time.time()
 pop_new = []
+# analise.calcula_carga_paga([0.64, 1.33, 2.04],[0.4, 0.28, 0.27, 0.07],[0,0,0], False)
 Moga_2020.Evolucao(pop_new)
 fim = time.time()
 total = fim-inicio

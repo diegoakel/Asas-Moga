@@ -32,17 +32,14 @@ class asa():
         self.afil = self.cordas[-1]/self.cordas[0]
         self.mac = (self.cordas[0]*(2/3)* ((1+self.afil+self.afil**2)/(1+self.afil)))
 
-    def file_and_commands(self): # Não mexer nisso~
-        file_and_commands(self)
+    def escrever_macro(self): 
+        escrever_macro(self)
         
-    def coeficientes(self):
-        coeficientes(self)
-    
-    def lift (self, V):
-        return (Modelo.rho_ar*V**(2)*0.5*self.CL*self.S)
-    
-    def drag (self, V):
-        return (Modelo.rho_ar*V**(2)*0.5*self.CD*self.S)
+    def executar_avl(self): 
+        executar_avl(self)
+
+    def coeficientes(self, limpar):
+        coeficientes(self, limpar)
 
     def mtow (self):
         return  mtow(self)
@@ -51,8 +48,8 @@ class asa():
         self.MTOW = self.calc_massa()[0]
         self.carga_paga = (self.MTOW - self.calc_massa()[1]) # Empirical
        
-    def analisa(self):
-        self.coeficientes()
+    def analisa(self, limpar):
+        self.coeficientes(limpar)
         self.mtow()
         self.calc_carga_paga()
 
@@ -63,28 +60,29 @@ class asa():
         return (MTOW, self.massa_vazia)
 
     def setar_secoes_intermediarias(self):
-        self.coef_interpolation = Modelo.calcula_secoes(self.envs, self.cordas)
-        self.inter_corda = []
-        self.inter_envs = []
-        self.inter_num_p = []
-
-        for i in range (0, Modelo.num_sections):
-            self.inter_envs.append(i*self.wingspan/(2*(Modelo.num_sections-1)))
-
-        for i in range (0, Modelo.num_sections):
-            self.inter_corda.append(Modelo.calcula_corda(self.inter_envs[i], self.coef_interpolation))
-
-            if i < Modelo.num_sections - 1:
-                delta =  math.ceil((self.inter_envs[i+1]-self.inter_envs[i])/Modelo.comprimento_elemento_env) -1
-                self.inter_num_p.append(max(delta,1))
-
-            self.inter_num_p.append(self.inter_num_p[-1])
+        self.coef_interpolation = Modelo.calcula_interpolador(self.envs, self.cordas)
+        self.inter_corda, self.inter_offset, self.inter_envs, self.inter_num_p = Modelo.calcula_secoes(self.wingspan, self.coef_interpolation, self.envs, self.cordas, self.offsets)
 
         self.setar_area(self.inter_envs, self.inter_corda)
 
 _asa = asa()
+def executar_avl(self):
+    commands  = open("comandos.avl" , "w")
+    commands.write("load asa.avl\n"   +
+    "oper\n" +
+    "a\n" +
+    "a %f\n" %(Modelo.alfa_stol) +
+    "x\n" +
+    "ft\n" +
+    "resultado.txt\n" +
+    "quit")
+    commands.close()
 
-def file_and_commands(self): # Não mexer nisso~
+    run_avl_command = 'avl.exe<' + 'comandos.avl'
+    os.popen(run_avl_command).read()
+
+
+def escrever_macro(self): # Não mexer nisso~
     file = f'''Urutau 2020 (2) 
     0.0                                 | Mach 
     0     0     0.0                     | iYsym  iZsym  Zsym
@@ -107,7 +105,7 @@ def file_and_commands(self): # Não mexer nisso~
 
     for i in range(0, len(self.inter_envs)):
         section =     f'''\nSECTION                                              |  (keyword)
-        0.0000    {self.inter_envs[i]}   0.0000    {self.inter_corda[i]}  0.000    {self.inter_num_p[i]}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]
+        {self.inter_offset[i]}    {self.inter_envs[i]}   0.0000    {self.inter_corda[i]}  0.000    {self.inter_num_p[i]}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]
         AFIL 0.0 1.0
         airfoil.dat \n'''
 
@@ -117,27 +115,22 @@ def file_and_commands(self): # Não mexer nisso~
     o.write(file)
     o.close()
 
-    commands  = open("comandos.avl" , "w")
-    commands.write("load asa.avl\n"   +
-    "oper\n" +
-    "a\n" +
-    "a %f\n" %(Modelo.alfa_stol) +
-    "x\n" +
-    "ft\n" +
-    "resultado.txt\n" +
-    "quit")
-    commands.close()
 
+def limpar_arquivos():
+    dirList = os.listdir()
+    arquivo = ""
+    for file in dirList:
+        if (file == "asa.avl") or (file == "resultado.txt") or  (file == "comandos.txt"):
+            arquivo = file
+            os.remove(arquivo)
 
-def coeficientes(self):
-    
+def coeficientes(self, limpar):
     self.setar_secoes_intermediarias()
-    self.file_and_commands()
-
-    run_avl_command = 'avl.exe<' + 'comandos.avl'
-    os.popen(run_avl_command).read()
+    self.escrever_macro()
+    self.executar_avl()
 
     results = (open("resultado.txt")).readlines()
+
     coefficients = []
     for line in results:
         matches = re.findall(r"\d\.\d\d\d\d", line)
@@ -146,15 +139,11 @@ def coeficientes(self):
 
     self.CD  = coefficients[-7]
     self.CL = coefficients[-8]    
-    self.e =  coefficients[-1]     
+    self.e =  coefficients[-1]   
+
+    if limpar:
+        limpar_arquivos()
     
-    # Limpar
-    dirList = os.listdir()
-    arquivo = ""
-    for file in dirList:
-        if (file == "asa.avl") or (file == "resultado.txt") or  (file == "comandos.txt"):
-            arquivo = file
-            os.remove(arquivo)
 
 def mtow(self):    
     for k in range (0, 270):
@@ -165,8 +154,8 @@ def mtow(self):
             W = (k/(9)) * Modelo.g
             V = math.sqrt((2*W)/(Modelo.rho_ar*self.S*self.CL)) * 1.2 * 0.7
             T = Modelo.a*((V*0.7)**2)+Modelo.b*(V*0.7)+Modelo.c
-            D = self.drag(V) 
-            L = self.lift(V)
+            D = 0.5*Modelo.rho_ar*V**2*self.S*self.CD
+            L = 0.5*Modelo.rho_ar*V**2*self.S*self.CL
             Slo = round((1.44*(W)**(2))/(Modelo.g*Modelo.rho_ar*self.S*self.CL*(T-(D+Modelo.mi_solo*(W-L)))), 2)
         
         if Slo > Modelo.comprimento_pista_maxima:
@@ -175,9 +164,9 @@ def mtow(self):
     self.W = W # MTOW em Newton
     return W
 
-def calcula_carga_paga(real_env, real_corda, real_offset):
+def calcula_carga_paga(real_env, real_corda, real_offset, limpar=True):
     _asa.setar_secoes(real_env, real_corda, real_offset)
-    _asa.analisa()
+    _asa.analisa(limpar)
     
     global parametros_temp
     parametros_temp = [_asa.S, _asa.CL, _asa.CD, _asa.massa_vazia]
@@ -197,6 +186,12 @@ def retorna_corda_2(real_env, real_corda, real_offset):
 
 def retorna_corda_ponta(real_env, real_corda, real_offset):
     return real_corda[3]
+
+def retorna_menor_corda(real_env, real_corda, real_offset):
+    _asa.setar_secoes(real_env, real_corda, real_offset)
+    _asa.setar_secoes_intermediarias()
+
+    return (min(_asa.inter_corda))
 
 def retorna_delta_envergadura_2(real_env, real_corda, real_offset):
     return (real_env[1]- real_env[0])
