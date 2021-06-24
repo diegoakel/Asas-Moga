@@ -193,6 +193,19 @@ def retorna_menor_corda(real_env, real_corda, real_offset):
 
     return (min(_asa.inter_corda))
 
+def retorna_maior_delta_corda(real_env, real_corda, real_offset):
+    _asa.setar_secoes(real_env, real_corda, real_offset)
+    _asa.setar_secoes_intermediarias()
+
+    delta_temp = (-1)*math.inf
+    for i in range (0, len(_asa.inter_corda) -1):
+        delta = _asa.inter_corda[i+1] - _asa.inter_corda[i]
+        if delta > delta_temp:
+            delta_temp = delta
+        
+    return delta_temp 
+
+
 def retorna_delta_envergadura_2(real_env, real_corda, real_offset):
     return (real_env[1]- real_env[0])
 

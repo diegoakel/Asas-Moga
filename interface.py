@@ -1,4 +1,5 @@
 import pandas as pd
+import apoio
 
 def Evolucao_completada(pop_new):
    print("Evolução finalizada.")
@@ -38,8 +39,9 @@ def Geracao_Finalizada(gen_no, pop_new, objetivos, constraints, objetivos_penali
 def Otimizacao_Iniciada(label):
     print (f"Otimização {label} iniciada.")
 
-def Otimizacao_Finalizada(label, total, cont_historico, cont_nova, cont_pre_check):
-   path = label +".txt"
+def Otimizacao_Finalizada(path, label, total, cont_historico, cont_nova, cont_pre_check):
+   completo = path + label
+   path = completo +".txt"
 
 
    with open (path, 'w') as file:
@@ -55,6 +57,7 @@ def Otimizacao_Finalizada(label, total, cont_historico, cont_nova, cont_pre_chec
    print (f"Total de análises históricas: {cont_historico}")
    print (f"Total de análises novas: {cont_nova}")
    print (f"Total de análises bloqueadas: {cont_pre_check}")
-   df.to_csv(f"{label}.csv")
+   df.to_csv(f"{completo}.csv")
 
-   
+   # apoio.gerar_relatorio(label, completo)
+

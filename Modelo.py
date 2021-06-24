@@ -11,6 +11,7 @@ mi_solo = 0.025
 
 # Parametros do problema
 delta_envergadura_minima = 0.3
+delta_corda_minima = 0
 envergadura_maxima = 4.2
 corda_ponta_minima = 0.05
 corda_minima = 0.05
@@ -26,7 +27,7 @@ a = -0.0126
 b = -0.5248
 c = 40.0248
 alfa_stol = 13.5
-grau_interpolacao = 1
+grau_interpolacao = 0
 num_sections = 11
 
 # Parametro otimização
@@ -38,7 +39,7 @@ tolerancia_nova_analise = 0
 
 #Modelo do problema
 no_objetivo = 1
-no_restricoes = 4
+no_restricoes = 5
 no_parameters = 4 + num_sections + (grau_interpolacao + 1)
 
 # Env1, Env2, Env3, Chord0, Chord1, Chord2, Chord3
@@ -46,9 +47,9 @@ x_res = [3, 3, 3, 3, 3, 3, 3]
 x_min = [delta_envergadura_minima, 2*delta_envergadura_minima, 3*delta_envergadura_minima, corda_fuselagem_minimo, corda_minima, corda_minima, corda_minima]
 x_max = [2, 2.2, 2.4, corda_fuselagem_maxima, corda_maxima, corda_maxima, corda_maxima]
 f_sinal = [constantes.maximizar]
-f_pen = [1000, 10000, 10000, 10000] 
-g_limite = [envergadura_maxima, delta_envergadura_minima, delta_envergadura_minima, corda_minima]
-g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que] 
+f_pen = [1000, 10000, 10000, 10000, 10000] 
+g_limite = [envergadura_maxima, delta_envergadura_minima, delta_envergadura_minima, corda_minima, delta_corda_minima]
+g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que, constantes.menor_que] 
 
 # Labels
 # nome_otimizacao = f"../Resultados/grau={grau_interpolacao}/Cobem_poly_{grau_interpolacao}_{pop_size}_{max_gen}_R3"
@@ -63,6 +64,7 @@ def Avalia_Individuo_Viavel(individuo, n, gen_no):
    constraint.append(analise.retorna_delta_envergadura_2(*fake_x(individuo[n])))
    constraint.append(analise.retorna_delta_envergadura_3(*fake_x(individuo[n])))
    constraint.append(analise.retorna_menor_corda(*fake_x(individuo[n])))
+   constraint.append(analise.retorna_maior_delta_corda(*fake_x(individuo[n])))
 
    parameters = analise.retorna_parametros()
 
@@ -81,6 +83,9 @@ def pre_checagem(vetor_x):
 
    if analise.retorna_menor_corda(*fake_x(vetor_x)) < corda_minima:
       return constantes.solucao_inviavel   
+   
+   if analise.retorna_maior_delta_corda(*fake_x(vetor_x)) > delta_corda_minima:
+      return constantes.solucao_inviavel      
 
    return constantes.solucao_viavel
 

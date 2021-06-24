@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import pandas as pd
 import os
 import re
@@ -14,6 +11,7 @@ import warnings
 import six
 import fpdf
 import pdfplumber
+import re
 warnings.filterwarnings("ignore")
 
 def render_mpl_table(data, col_width=3.0, row_height=0.625, font_size=14,
@@ -40,13 +38,10 @@ def render_mpl_table(data, col_width=3.0, row_height=0.625, font_size=14,
             cell.set_facecolor(row_colors[k[0]%len(row_colors) ])
     return ax
 
-
 def plot_asa(geo, position=[1,1,1], figure=0, grade=True, color='black', sections=False):
     '''
     Recebe o "df.iloc[x]"
     '''
-#     pontuacao = geo[8]
-#     georacao = geo[7]
     geo = list(geo)#[0:10]   
     
     envs = geo[0:3]
@@ -126,17 +121,12 @@ def plot_asa(geo, position=[1,1,1], figure=0, grade=True, color='black', section
     else:
         plt.axis('off')
 
-#     plt.show()
-#     return (ax)
-
 def checa_sobrevivencia(df):
     df["Sobreviveu"] = ""
     posicao = 0
     for i in range(0, len(df)-1):
         for x,individuo in enumerate([list(linha[:10]) for linha in df[df["Geracao"] == i].values]):
-#             filename = df[df["Geracao"] == i].values[x][-3]
             if individuo in [list(linha[:10]) for linha in df[df["Geracao"] == i+1].values]:
-#                 df.loc[df["File"]==filename,"Sobreviveu"] = "Sim"
                 df.loc[posicao,"Sobreviveu"] = "Sim"
             else:
                 df.loc[posicao,"Sobreviveu"] = "Não"
@@ -144,7 +134,6 @@ def checa_sobrevivencia(df):
     return df
 
 def animacao(df,file= 'animacao_geracoes'):
-#     df = checa_sobrevivencia(df)
     directory = "./plot/"
     linhas = 8
     colunas = 5
@@ -190,11 +179,10 @@ def animacao(df,file= 'animacao_geracoes'):
     cv2.destroyAllWindows()
     video.release()
 
-
 def ler_logs(arquivo):
     df_final = pd.DataFrame()
 
-    df = pd.read_csv(f"./Resultados/{arquivo}.csv")
+    df = pd.read_csv(f"{arquivo}.csv")
     df= df.drop('Unnamed: 0', axis=1)
 
     for i in ['pop_new', 'objetivos', 'constraints','objetivos_penalizados', 'parameters', 'viavel']:
@@ -231,95 +219,95 @@ def ler_logs(arquivo):
     if len(parametros[0])==18:
         [param.insert(7,0) for param in parametros]
     
-#     print(parametros[0])
-#     print(variaveis)
     resultados = pd.DataFrame(parametros, columns= variaveis)
     df_final = pd.concat([df_final, resultados], axis=1)
     
     return df_final
 
-# # Leitura de dados
 
-file = "Cobem_poly_3_20_300_R3"
-path = "grau=3/"+file
-df = ler_logs(path)
-# df
+def gerar_relatorio(label, path):
+    # file = "Cobem_poly_3_20_300_R3"
+    # path = "grau=3/"+ file
+    # grau = re.findall(r"grau=\d", path)[0]
 
-df = df[df['viavel']==0]
-ultima = df[df['Geracao']==299]
+    path = path
+    df = ler_logs(path)
 
-ultima = ultima[['Envergadura_1', 'Envergadura_2', 'Envergadura_3', 'Corda_1', 'Corda_2',
-       'Corda_3', 'Corda_4', 'Pontuacao', 'Area', 'CL', 'CD', 'Massa_Vazia']]
+    df = df[df['viavel']==0]
+    ultima = df[df['Geracao']==299]
 
-ultima = ultima[['Envergadura_1', 'Envergadura_2', 'Envergadura_3', 'Corda_1', 'Corda_2',
-       'Corda_3', 'Corda_4', 'Pontuacao']]
+    ultima = ultima[['Envergadura_1', 'Envergadura_2', 'Envergadura_3', 'Corda_1', 'Corda_2',
+        'Corda_3', 'Corda_4', 'Pontuacao', 'Area', 'CL', 'CD', 'Massa_Vazia']]
 
-for coluna in ultima.columns:
-    ultima[coluna] = ultima[coluna].apply(lambda x: str(x)[:4])
-    
-ultima = ultima.rename(columns = {"Envergadura_1": "Env_1", "Envergadura_2": "Env_2","Envergadura_3": "Env_3"})
+    ultima = ultima[['Envergadura_1', 'Envergadura_2', 'Envergadura_3', 'Corda_1', 'Corda_2',
+        'Corda_3', 'Corda_4', 'Pontuacao']]
 
-ultima = ultima.sort_values("Pontuacao", ascending=False)
-ultima =  ultima.head(20)
+    for coluna in ultima.columns:
+        ultima[coluna] = ultima[coluna].apply(lambda x: str(x)[:4])
+        
+    ultima = ultima.rename(columns = {"Envergadura_1": "Env_1", "Envergadura_2": "Env_2","Envergadura_3": "Env_3"})
 
-render_mpl_table(ultima, header_columns=0, col_width=2.0)
-plt.savefig('ultima.png')
+    ultima = ultima.sort_values("Pontuacao", ascending=False)
+    ultima =  ultima.head(20)
 
-plot_asa(df.loc[11999])
-plt.savefig('melhor.png')
+    render_mpl_table(ultima, header_columns=0, col_width=2.0)
+    plt.savefig('../ultima.png')
 
-
-# # Visualiações 
-# for i in range(0, len(ultima)):
-#     plot_asa(ultima.iloc[i])
-
-plt.figure(figsize=(10,8))
-
-viavel = df[df["viavel"]==0]
-viavel.groupby("Geracao").max()["Pontuacao"].plot()
-
-plt.title("Cobem Polynomial")
-plt.xlabel("Generation")
-plt.ylabel("Payload (kg)")
-plt.ylim(15,19.5)
-plt.savefig('payload_generation.png')
+    plot_asa(df.loc[11999])
+    plt.savefig('../melhor.png')
 
 
-sns.set(font_scale = 1.3)
-plt.figure(figsize=(10,8))
-sns.scatterplot(data= df, x="Area", y="Pontuacao", alpha=1, palette=['black'])
+    # # Visualiações 
+    # for i in range(0, len(ultima)):
+    #     plot_asa(ultima.iloc[i])
 
-plt.xlabel("Wing Surface Area ($\mathregular{m^{2}}$)")
-plt.ylabel("Payload (kg)")
-plt.title("Cobem")
+    plt.figure(figsize=(10,8))
 
-_ = plt.xlim(0,3.5)
-_ = plt.ylim(5,22)
-plt.savefig('payload_area.png')
+    viavel = df[df["viavel"]==0]
+    viavel.groupby("Geracao").max()["Pontuacao"].plot()
 
-# df = checa_sobrevivencia(df)
-# animacao(df)
+    plt.title("Cobem Polynomial")
+    plt.xlabel("Generation")
+    plt.ylabel("Payload (kg)")
+    plt.ylim(15,19.5)
+    plt.savefig('../payload_generation.png')
 
 
-# # Relatório
-pdf = fpdf.FPDF()
-pdf.add_page()
-pdf.set_font('arial', 'B', 30)
-pdf.cell(60)
-pdf.cell(75, 10, f"{file}", 0,2,"C")
-pdf.set_font('arial','B' , 11)
-pdf.cell(75, 10, "Ultima Geração", 0,2,"C")
-pdf.cell(90,10, '', 0,2, "C")
-pdf.cell(-55)
-pdf.image('ultima.png', x=0, y=None, w=200, h=0, type='', link='')
-pdf.image('payload_generation.png', x=0, y=None, w=200, h=0, type='', link='')
-pdf.image('payload_area.png', x=0, y=None, w=200, h=0, type='', link='')
-pdf.cell(60)
-pdf.cell(75, 10, "Melhor Asa", 0,2,"C")
-pdf.cell(-60)
-pdf.image('melhor.png', x=0, y=None, w=200, h=0, type='', link='')
-grau = file.split("_")[2]
-pdf.output(f'./Resultados/grau={grau}/{file}.pdf','F')
+    sns.set(font_scale = 1.3)
+    plt.figure(figsize=(10,8))
+    sns.scatterplot(data= df, x="Area", y="Pontuacao", alpha=1, palette=['black'])
+
+    plt.xlabel("Wing Surface Area ($\mathregular{m^{2}}$)")
+    plt.ylabel("Payload (kg)")
+    plt.title("Cobem")
+
+    _ = plt.xlim(0,3.5)
+    _ = plt.ylim(5,22)
+    plt.savefig('../payload_area.png')
+
+    # df = checa_sobrevivencia(df)
+    # animacao(df)
+
+
+    # # Relatório
+    pdf = fpdf.FPDF()
+    pdf.add_page()
+    pdf.set_font('arial', 'B', 30)
+    pdf.cell(60)
+    pdf.cell(75, 10, f"{label}", 0,2,"C")
+    pdf.set_font('arial','B' , 11)
+    pdf.cell(75, 10, "Ultima Geração", 0,2,"C")
+    pdf.cell(90,10, '', 0,2, "C")
+    pdf.cell(-55)
+    pdf.image('../ultima.png', x=0, y=None, w=200, h=0, type='', link='')
+    pdf.image('../payload_generation.png', x=0, y=None, w=200, h=0, type='', link='')
+    pdf.image('../payload_area.png', x=0, y=None, w=200, h=0, type='', link='')
+    pdf.cell(60)
+    pdf.cell(75, 10, "Melhor Asa", 0,2,"C")
+    pdf.cell(-60)
+    pdf.image('../melhor.png', x=0, y=None, w=200, h=0, type='', link='')
+    # grau = path.split("_")[2]
+    pdf.output(f'{path}.pdf','F')
 
 
 
