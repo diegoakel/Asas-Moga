@@ -1,137 +1,325 @@
-from matplotlib import pyplot as plt
+#!/usr/bin/env python
+# coding: utf-8
 
-def visualizador (lista):
-    pontuacoes = []
-    geracoes = [*range(1, len(lista) +1)]
-    size = []
+import pandas as pd
+import os
+import re
+import numpy as np
+from numpy import inf
+import cv2
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import warnings
+import six
+import fpdf
+import pdfplumber
+warnings.filterwarnings("ignore")
 
-    # Ele vai adicionando sempre a melhor pontuação. Só adiciona se for melhor que a geração anterior
-    for i in range (0, len(lista)):
-        size.append(lista[i].B)
-        if (i==0):
-            pontuacoes.append(lista[i].pontuacao)
+def render_mpl_table(data, col_width=3.0, row_height=0.625, font_size=14,
+                     header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
+                     bbox=[0, 0, 1, 1], header_columns=0,
+                     ax=None, **kwargs):
+    ''' Renderiza um Dataframe'''
+    if ax is None:
+        size = (np.array(data.shape[::-1]) + np.array([0, 1])) * np.array([col_width, row_height])
+        fig, ax = plt.subplots(figsize=size)
+        ax.axis('off')
+
+    mpl_table = ax.table(cellText=data.values, bbox=bbox, colLabels=data.columns, **kwargs)
+
+    mpl_table.auto_set_font_size(False)
+    mpl_table.set_fontsize(font_size)
+
+    for k, cell in  six.iteritems(mpl_table._cells):
+        cell.set_edgecolor(edge_color)
+        if k[0] == 0 or k[1] < header_columns:
+            cell.set_text_props(weight='bold', color='w')
+            cell.set_facecolor(header_color)
         else:
-            if (lista[i].pontuacao > lista[i-1].pontuacao):
-                pontuacoes.append(lista[i].pontuacao)
+            cell.set_facecolor(row_colors[k[0]%len(row_colors) ])
+    return ax
 
+
+def plot_asa(geo, position=[1,1,1], figure=0, grade=True, color='black', sections=False):
+    '''
+    Recebe o "df.iloc[x]"
+    '''
+#     pontuacao = geo[8]
+#     georacao = geo[7]
+    geo = list(geo)#[0:10]   
+    
+    envs = geo[0:3]
+    
+    # Isso é para o sem interpolação
+    if len(geo) > 21:
+        cordas = geo[20:]
+    else:
+        cordas = geo[3:7]
+    
+    offsets = []
+    
+    envs_new = []
+    for i in range (0, len(cordas)):
+        envs_new.append(i*(max(envs)*2)/(2*(len(cordas)-1)))
+        
+    envs = envs_new
+    
+    for i in range (0, len(cordas)):
+        if i==0:
+            offsets.append(0)
+        else:
+            offsets.append((cordas[0]-cordas[i])/2)
+    
+    if figure == 0:
+        fig = plt.figure()
+    else:
+        fig = figure
+        
+    ax = fig.add_subplot(*position, aspect='equal')
+        
+    if sections ==False:
+        x = [0,envs[0],envs[1],envs[2],envs[2],envs[1],envs[0],0]
+        y = [0,offsets[0],offsets[1],offsets[2],offsets[2]+cordas[-1],offsets[1]+cordas[-2],offsets[0]+cordas[-3],cordas[-4]]
+        
+        # Cobem
+        x = envs +  envs[::-1]
+        y = offsets + list(np.sum([offsets[::-1], cordas[::-1]], axis=0))
+        
+        ax.add_patch(patches.Polygon(xy=list(zip(x,y)), fill=False, color="black"))
+    
+    else:
+        # Seção 1
+        x = [0,envs[0],envs[0],0]
+        y = [0,offsets[0],offsets[0]+cordas[-3],cordas[-4]]
+        ax.add_patch(patches.Polygon(xy=list(zip(x,y)), fill=False))
+        
+        # Seção 2
+        x = [envs[0],envs[1],envs[1],envs[0]]
+        y = [offsets[0],offsets[1],offsets[1]+cordas[-2],offsets[0]+cordas[-3]]
+        ax.add_patch(patches.Polygon(xy=list(zip(x,y)), fill=False))
+        
+        # Seção 3
+        x = [envs[1],envs[2],envs[2],envs[1]]
+        y = [offsets[1],offsets[2], offsets[2]+cordas[-1],offsets[1]+cordas[-2]]
+        ax.add_patch(patches.Polygon(xy=list(zip(x,y)), fill=False))        
+        
+    if (color != 0):
+        ax.add_patch(patches.Polygon(xy=list(zip(x,y)), fill=True, color=color))
+
+    x = [value*-1 for value in x]
+    
+    ax.add_patch(patches.Polygon(xy=list(zip(x,y)), fill=False))
+                 
+    if color!= 0:
+        ax.add_patch(patches.Polygon(xy=list(zip(x,y)), fill=True, color=color))
+
+    plt.xlim(min(x)*-1.2, min(x)*1.2)
+    plt.ylim(-0.3,max(y)*1.3)
+    
+    if sections:
+        plt.xlim(0, min(x)*1.2*-1)
+        
+    if grade:
+        plt.title(f"")
+        
+    else:
+        plt.axis('off')
+
+#     plt.show()
+#     return (ax)
+
+def checa_sobrevivencia(df):
+    df["Sobreviveu"] = ""
+    posicao = 0
+    for i in range(0, len(df)-1):
+        for x,individuo in enumerate([list(linha[:10]) for linha in df[df["Geracao"] == i].values]):
+#             filename = df[df["Geracao"] == i].values[x][-3]
+            if individuo in [list(linha[:10]) for linha in df[df["Geracao"] == i+1].values]:
+#                 df.loc[df["File"]==filename,"Sobreviveu"] = "Sim"
+                df.loc[posicao,"Sobreviveu"] = "Sim"
             else:
-                pontuacoes.append(lista[i-1].pontuacao)
+                df.loc[posicao,"Sobreviveu"] = "Não"
+            posicao +=1
+    return df
 
-    # Criar o gráfico
-    plt.style.use('seaborn')
-    plt.scatter(geracoes,pontuacoes, s=60, c = size, cmap = 'Greens', edgecolor= "black", linewidth = 1, alpha = 1)
-    cbar = plt.colorbar()
-    cbar.set_label ('Envergadura')
-    plt.title ("Asas")
-    plt.xlabel("Geração")
-    plt.ylabel("Pontuação")
-    plt.tight_layout()
-    plt.show()
-
-def polar(dataframe, index = [0], tipo = 5, scatter = False):
-    
-    '''
-    Vizualização de polares de acordo com o DataFrame dado, uma lista de asas na qual
-    queira vizualizar e o tipo da polar de acordo com a documentação
-    
-    dataframe: Um dataframe contendo as asas e o resultado das análises
-    
-    index: uma lista contendo o index das asas na quais queira vizualizar
-    
-    tipo: qual a polar você quer vizualizar
-    
-    Tipos
-    1 - cl x cd
-    2 - cd x cl
-    3 - cl/cd x alfa
-    4 - cd/cl x alfa
-    5 - cd x alfa
-    6 - cl x alfa
-    '''
-    
-    
-    plt.style.use('classic')
-    plt.rcParams['figure.figsize'] = (11,7)
-    
-    for i in index:
+def animacao(df,file= 'animacao_geracoes'):
+#     df = checa_sobrevivencia(df)
+    directory = "./plot/"
+    linhas = 8
+    colunas = 5
+    for geracao in range (0, df["Geracao"].nunique()-1):
+        f = plt.figure(figsize=(15,8))
+        atual  = df[df["Geracao"]==geracao].reset_index(drop=True)
+        for i in range(1, len(atual)+1):
+            plot_asa(atual.iloc[i-1], [linhas, colunas, i], f, grade=False)
+            
+        plt.savefig(f"{directory}geracao_{geracao}_0.jpeg", transparent=False)
         
-        asa_escolhida = dataframe.loc[i]
-
-        CD_lista = asa_escolhida["CD"]
-        CL_lista = asa_escolhida["CL"]
-        ALFA_lista = asa_escolhida["ALFA"]
-        
-        #CD_lista = [0.0008, 0.0007, 0.0011, 0.002, 0.0034, 0.0052, 0.0075, 0.0103, 0.0136, 0.0173, 0.0215, 0.0262, 0.0313, 0.0368, 0.0428, 0.0492, 0.056, 0.0632, 0.0707, 0.0786, 0.0869, 0.0955, 0.1044, 0.1135, 0.1229, 0.1326, 0.1424, 0.1524, 0.1626, 0.1729, 0.1834, 0.1939, 0.2044, 0.215, 0.2256]
-        #CL_lista = [0.1007, 0.0249, 0.0509, 0.1269, 0.2029, 0.2788, 0.3547, 0.4305, 0.5061, 0.5815, 0.6566, 0.7314, 0.8059, 0.8799, 0.9535, 1.0266, 1.0991, 1.1711, 1.2424, 1.3131, 1.383, 1.4522, 1.5206, 1.5882, 1.6549, 1.7207, 1.7856, 1.8495, 1.9124, 1.9743, 2.0351, 2.0949, 2.1535, 2.211, 2.2674]
-        #ALFA_lista = [-15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-
-        CDxCL_lista = []
-        CLxCD_lista = []
-        for cd, cl in zip(CD_lista, CL_lista):
-                CDxCL_lista.append(cd/cl)
-                CLxCD_lista.append(cl/cd)
+        f = plt.figure(figsize=(15,8))
+        for i in range(1, len(atual)+1):
+            if atual.loc[i-1, "Sobreviveu"] == "Sim":
+                plot_asa(atual.iloc[i-1], [linhas, colunas, i], f, grade=False, color="green")
                 
-        if(tipo == 1):
-
-                plt.plot(CD_lista, CL_lista)
-                if(scatter):
-                        plt.scatter(CD_lista, CL_lista)
-                        
-                plt.title('CL x CD')
-
-                plt.xlabel('CD')
-                plt.ylabel('CL')
+            elif atual.loc[i-1, "Sobreviveu"] == "Não":
+                plot_asa(atual.iloc[i-1], [linhas, colunas, i], f, grade=False, color="firebrick")
                 
-        elif(tipo == 2):
-                plt.plot(CL_lista, CD_lista)
-                if(scatter):
-                        plt.scatter(ALFA_lista, CLxCD_lista)
-                        
-                plt.title('CD x CL')
+        plt.savefig(f"{directory}geracao_{geracao}_1.jpeg", transparent=False)
+    
+    # Video
+    video_name =directory+file+'.mp4'
+    images = [img for img in os.listdir(directory) if img.endswith(".jpeg")]
+    frame = cv2.imread(os.path.join(directory, images[0]))
+    height, width, layers = frame.shape
 
-                plt.xlabel('CL')
-                plt.ylabel('CD')
+    df = pd.DataFrame([image.split("_")[1:3]  for image in images], images).reset_index()
+    df.columns = ["file", "geracao", "tipo"]
+    df["geracao"] = df["geracao"].astype(int)
+    df["tipo"] = df["tipo"].str[0].astype(int)
+    df = df.sort_values(by=["geracao", "tipo"])
+    images_formatos = list(df[df["tipo"]==0]["file"])
+    images_cores = list(df[df["tipo"]==1]["file"])
+    images = list(df["file"])
 
-        elif(tipo == 3):
-                plt.plot(ALFA_lista, CLxCD_lista)
-                if(scatter):
-                        plt.scatter(ALFA_lista, CLxCD_lista)
-                        
-                plt.title('CL/CD x ALFA')
+    fps = 5
+    video = cv2.VideoWriter(video_name, 0, fps, (width,height))
 
-                plt.xlabel('CL/CD')
-                plt.ylabel('ALFA')
+    for image in images:
+        video.write(cv2.imread(os.path.join(directory, image)))
 
-        elif(tipo == 4):
-                plt.plot(ALFA_lista, CDxCL_lista)
-                if(scatter):
-                        plt.scatter(ALFA_lista, CDxCL_lista)
-                        
-                plt.title('CD/CL x ALFA')
+    cv2.destroyAllWindows()
+    video.release()
 
-                plt.xlabel('ALFA')
-                plt.ylabel('CD/CL')
 
-        elif(tipo == 5):
-                plt.plot(ALFA_lista, CD_lista)
-                if(scatter):
-                        plt.scatter(ALFA_lista, CD_lista)
-                        
-                plt.title('CD x ALFA')
+def ler_logs(arquivo):
+    df_final = pd.DataFrame()
 
-                plt.xlabel('ALFA')
-                plt.ylabel('CD')
+    df = pd.read_csv(f"./Resultados/{arquivo}.csv")
+    df= df.drop('Unnamed: 0', axis=1)
 
-        elif(tipo == 6):
-                plt.plot(ALFA_lista, CL_lista)
-                if(scatter):
-                        plt.scatter(ALFA_lista, CL_lista)
+    for i in ['pop_new', 'objetivos', 'constraints','objetivos_penalizados', 'parameters', 'viavel']:
+        df[i] = df[i].apply(lambda x: eval(x))
 
-                plt.title('CL x ALFA')
+    variaveis = ["Envergadura_1", "Envergadura_2","Envergadura_3","Corda_1","Corda_2","Corda_3","Corda_4"]
+    geometria = pd.DataFrame(df[["pop_new"]].explode("pop_new")["pop_new"].to_list(), columns= variaveis)
+    gen_no = df[["gen_no","pop_new"]].explode("pop_new")["gen_no"]
+    df_final = pd.concat([df_final,geometria])
+    df_final["Geracao"] = gen_no.reset_index(drop=True)
 
-                plt.xlabel('ALFA')
-                plt.ylabel('CL')
+    df_final["Pontuacao"] = df[["objetivos"]].explode("objetivos")["objetivos"].apply(lambda x: x[0]*-1).reset_index(drop="True")
+
+    df_final["constraints"] =  df[["constraints"]].explode("constraints").reset_index(drop=True)["constraints"]
+
+    df_final["objetivos_penalizados"] = df[["objetivos_penalizados"]].explode("objetivos_penalizados")["objetivos_penalizados"].apply(lambda x: x[0]).reset_index(drop="True")
+
+    df_final["viavel"] = df[["viavel"]].explode("viavel").reset_index(drop=True)["viavel"]
+    
+    parametros = df[["parameters"]].explode("parameters")["parameters"].to_list()
+    
+    variaveis = ["Area", "CL","CD","Massa_Vazia","a", "b", "c", "d"]
+    
+    if len(parametros[0]) > 10:
+        [variaveis.append(f"Chord_{i}") for i in range(1,12)]
+    
+    if len(parametros[0]) < 10:
+        variaveis.append("extra")
+        for i in range(0, len(parametros)):
+            if len(parametros[i]) >10:
+                parametros[i] = [0]*9
         
+    # Ordem dos coef pode estar errada
+    if len(parametros[0])==18:
+        [param.insert(7,0) for param in parametros]
+    
+#     print(parametros[0])
+#     print(variaveis)
+    resultados = pd.DataFrame(parametros, columns= variaveis)
+    df_final = pd.concat([df_final, resultados], axis=1)
+    
+    return df_final
 
-    plt.grid()
-    plt.show()
+# # Leitura de dados
+
+file = "Cobem_poly_3_20_300_R3"
+path = "grau=3/"+file
+df = ler_logs(path)
+# df
+
+df = df[df['viavel']==0]
+ultima = df[df['Geracao']==299]
+
+ultima = ultima[['Envergadura_1', 'Envergadura_2', 'Envergadura_3', 'Corda_1', 'Corda_2',
+       'Corda_3', 'Corda_4', 'Pontuacao', 'Area', 'CL', 'CD', 'Massa_Vazia']]
+
+ultima = ultima[['Envergadura_1', 'Envergadura_2', 'Envergadura_3', 'Corda_1', 'Corda_2',
+       'Corda_3', 'Corda_4', 'Pontuacao']]
+
+for coluna in ultima.columns:
+    ultima[coluna] = ultima[coluna].apply(lambda x: str(x)[:4])
+    
+ultima = ultima.rename(columns = {"Envergadura_1": "Env_1", "Envergadura_2": "Env_2","Envergadura_3": "Env_3"})
+
+ultima = ultima.sort_values("Pontuacao", ascending=False)
+ultima =  ultima.head(20)
+
+render_mpl_table(ultima, header_columns=0, col_width=2.0)
+plt.savefig('ultima.png')
+
+plot_asa(df.loc[11999])
+plt.savefig('melhor.png')
+
+
+# # Visualiações 
+# for i in range(0, len(ultima)):
+#     plot_asa(ultima.iloc[i])
+
+plt.figure(figsize=(10,8))
+
+viavel = df[df["viavel"]==0]
+viavel.groupby("Geracao").max()["Pontuacao"].plot()
+
+plt.title("Cobem Polynomial")
+plt.xlabel("Generation")
+plt.ylabel("Payload (kg)")
+plt.ylim(15,19.5)
+plt.savefig('payload_generation.png')
+
+
+sns.set(font_scale = 1.3)
+plt.figure(figsize=(10,8))
+sns.scatterplot(data= df, x="Area", y="Pontuacao", alpha=1, palette=['black'])
+
+plt.xlabel("Wing Surface Area ($\mathregular{m^{2}}$)")
+plt.ylabel("Payload (kg)")
+plt.title("Cobem")
+
+_ = plt.xlim(0,3.5)
+_ = plt.ylim(5,22)
+plt.savefig('payload_area.png')
+
+# df = checa_sobrevivencia(df)
+# animacao(df)
+
+
+# # Relatório
+pdf = fpdf.FPDF()
+pdf.add_page()
+pdf.set_font('arial', 'B', 30)
+pdf.cell(60)
+pdf.cell(75, 10, f"{file}", 0,2,"C")
+pdf.set_font('arial','B' , 11)
+pdf.cell(75, 10, "Ultima Geração", 0,2,"C")
+pdf.cell(90,10, '', 0,2, "C")
+pdf.cell(-55)
+pdf.image('ultima.png', x=0, y=None, w=200, h=0, type='', link='')
+pdf.image('payload_generation.png', x=0, y=None, w=200, h=0, type='', link='')
+pdf.image('payload_area.png', x=0, y=None, w=200, h=0, type='', link='')
+pdf.cell(60)
+pdf.cell(75, 10, "Melhor Asa", 0,2,"C")
+pdf.cell(-60)
+pdf.image('melhor.png', x=0, y=None, w=200, h=0, type='', link='')
+grau = file.split("_")[2]
+pdf.output(f'./Resultados/grau={grau}/{file}.pdf','F')
+
+
+

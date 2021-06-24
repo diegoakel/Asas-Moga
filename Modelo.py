@@ -26,7 +26,7 @@ a = -0.0126
 b = -0.5248
 c = 40.0248
 alfa_stol = 13.5
-grau_interpolacao = 3
+grau_interpolacao = 1
 num_sections = 11
 
 # Parametro otimização
@@ -51,7 +51,7 @@ g_limite = [envergadura_maxima, delta_envergadura_minima, delta_envergadura_mini
 g_sinal = [constantes.menor_que, constantes.maior_que, constantes.maior_que, constantes.maior_que] 
 
 # Labels
-nome_otimizacao = f"Cobem_poly_{grau_interpolacao}_{pop_size}_{max_gen}_R1"
+# nome_otimizacao = f"../Resultados/grau={grau_interpolacao}/Cobem_poly_{grau_interpolacao}_{pop_size}_{max_gen}_R3"
 
 def Avalia_Individuo_Viavel(individuo, n, gen_no):
    objective = []
@@ -98,6 +98,10 @@ def calcula_interpolador(vetor_x, vetor_y):
    return z
 
 def calcula_corda(env_x, coef_interpolation):
+
+   if grau_interpolacao == 1:
+      return coef_interpolation[0]*env_x + coef_interpolation[1]
+
    if grau_interpolacao == 2:
       return coef_interpolation[0]*env_x**2 + coef_interpolation[1]*env_x + coef_interpolation[2]
    

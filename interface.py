@@ -39,9 +39,22 @@ def Otimizacao_Iniciada(label):
     print (f"Otimização {label} iniciada.")
 
 def Otimizacao_Finalizada(label, total, cont_historico, cont_nova, cont_pre_check):
-    print (f"Otimização {label} finalizada.")
-    print (f"Tempo total: {total} segundos")
-    print (f"Total de análises históricas: {cont_historico}")
-    print (f"Total de análises novas: {cont_nova}")
-    print (f"Total de análises bloqueadas: {cont_pre_check}")
-    df.to_csv(f"{label}.csv")
+   path = label +".txt"
+
+
+   with open (path, 'w') as file:
+      file.write(f"------------\n")
+      file.write(f"Tempo total: {total} segundos \n")
+      file.write(f"Total de análises históricas: {cont_historico} \n")
+      file.write(f"Total de análises novas: {cont_nova} \n")
+      file.write(f"Total de análises bloqueadas: {cont_pre_check} \n")
+
+
+   print (f"Otimização {label} finalizada.")
+   print (f"Tempo total: {total} segundos")
+   print (f"Total de análises históricas: {cont_historico}")
+   print (f"Total de análises novas: {cont_nova}")
+   print (f"Total de análises bloqueadas: {cont_pre_check}")
+   df.to_csv(f"{label}.csv")
+
+   
