@@ -21,13 +21,18 @@ def Elitismo_Aplicado(rank, new_solution):
    pass
 
 
+def Otimizacao_Iniciada(label):
+   global df
+   df =  pd.DataFrame()
+   # df =  pd.DataFrame(columns=["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel", "parameters"])
+   print (f"Otimização {label} iniciada.")
+
+
 def Geracao_Iniciada(gen_no, pop_new):
    print(f"\nGeração {gen_no} iniciada.")
-
    pass
 
-
-df =  pd.DataFrame(columns=["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel", "parameters"])
+# df =  pd.DataFrame(columns=["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel", "parameters"])
 def Geracao_Finalizada(gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel, parameters):
    global df
    dados = [gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel, parameters]
@@ -35,9 +40,6 @@ def Geracao_Finalizada(gen_no, pop_new, objetivos, constraints, objetivos_penali
    df2.columns = ["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel", "parameters"]
    df = pd.concat([df, df2])
 
-
-def Otimizacao_Iniciada(label):
-    print (f"Otimização {label} iniciada.")
 
 def Otimizacao_Finalizada(path, label, total, cont_historico, cont_nova, cont_pre_check):
    completo = path + label

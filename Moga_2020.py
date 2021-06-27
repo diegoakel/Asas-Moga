@@ -310,8 +310,20 @@ def Completa_PopInicial(pop_new):
 
    return pop_fake + pop_new
 
+def limpar_historico():
+   cont_analise_historico[0] = 0
+   cont_analise_nova[0] = 0
+   cont_analise_pre_check[0] = 0
+
+   historico.historico_vetor_x = []
+   historico.historico_objetivo = []
+   historico.historico_constraint = []
+   historico.historico_objective_penalizado = []
+   historico.historico_viavel = []
+   historico.historico_parameters = []
 
 def Evolucao(pop_new):
+   limpar_historico()
    pop_new = Completa_PopInicial(pop_new)
    for gen_no in range (0, Modelo.max_gen):
       interface.Geracao_Iniciada(gen_no, pop_new)

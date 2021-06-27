@@ -96,11 +96,17 @@ def fake_x(vetor_x):
 
    return fake_env, fake_corda, fake_offset
 
-def calcula_interpolador(vetor_x, vetor_y):
+def calcula_interpolador_polynomial(vetor_x, vetor_y):
    x = np.array([0, vetor_x[0], vetor_x[1], vetor_x[2]])
    y = np.array([vetor_y[0], vetor_y[1], vetor_y[2], vetor_y[3]])
    z = np.polyfit(x, y, grau_interpolacao)
    return z
+
+def calcula_interpolador(vetor_x, vetor_y):
+   if grau_interpolacao > 0:
+      return calcula_interpolador_polynomial(vetor_x, vetor_y)
+   
+   return [0]
 
 def calcula_corda(env_x, coef_interpolation):
 
