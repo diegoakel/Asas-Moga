@@ -120,16 +120,29 @@ def calcula_corda(env_x, coef_interpolation):
       return coef_interpolation[0]*env_x**3 + coef_interpolation[1]*env_x**2 + coef_interpolation[2]*env_x + coef_interpolation[3]
 
 
-def calcula_secoes_linear(envs, cordas, offsets):
+def calcula_secoes_segmented(envs, cordas, offsets):
    inter_num_p = []
+   inter_offset = []
+   inter_envs = []
+   inter_corda = []
+
+   for i in range (0, len(cordas)):
+      inter_corda.append(cordas[i])
+      inter_offset.append((cordas[0]-cordas[i])/2)
+
+   inter_envs.append(0)
+   for i in range (0, len(envs)):
+      inter_envs.append(envs[i])
+
    for i in range (0, len(envs)):
       if i < len(envs) - 1:
             delta =  math.ceil((envs[i+1]-envs[i])/comprimento_elemento_env) -1
             inter_num_p.append(max(delta,1))
 
+
       inter_num_p.append(inter_num_p[-1])
 
-   return cordas, offsets, envs, inter_num_p
+   return inter_corda, inter_offset, inter_envs, inter_num_p
    
 
 def calcula_secoes_polynomial(wingspan, coef_interpolation):
@@ -159,6 +172,6 @@ def calcula_secoes(wingspan, coef_interpolation, envs, cordas, offsets):
       return calcula_secoes_polynomial(wingspan, coef_interpolation)
    
    else:
-      return calcula_secoes_linear(envs, cordas, offsets)
+      return calcula_secoes_segmented(envs, cordas, offsets)
 
  

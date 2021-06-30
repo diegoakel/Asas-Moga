@@ -20,11 +20,12 @@ class asa():
 
     def setar_area(self, envs, cordas):
         total = 0
-        for i in range(0,len(envs)-1):
+        for i in range(0, len(envs)-1):
             if (i == 0):
-                total += ((cordas[i] + cordas[i+1])*envs[i])/2
+                
+                total += (cordas[i] + cordas[i+1])*(envs[i+1] - envs[i])/2
             else:
-                total += ((cordas[i] + cordas[i+1])*(envs[i]-envs[i-1]))/2      
+                total += ((cordas[i] + cordas[i+1])*(envs[i+1]-envs[i]))/2      
         
         self.wingspan = (self.envs[-1]*2)
         self.S = total*2
