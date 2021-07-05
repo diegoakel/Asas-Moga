@@ -16,8 +16,8 @@ class asa():
         self.envs = envs
         self.offsets = offsets
         self.cordas = cordas
-        self.setar_area(envs, cordas)
-
+        self.wingspan = (self.envs[-1]*2)
+        
     def setar_area(self, envs, cordas):
         total = 0
         for i in range(0, len(envs)-1):
@@ -55,14 +55,16 @@ class asa():
         self.calc_carga_paga()
 
     def calc_massa(self):
-        fator_corretivo = 1.09
-        MTOW = ((self.W/Modelo.g)/fator_corretivo) # MTOW em kg
+        MTOW = ((self.W/Modelo.g)/Modelo.fator_corretivo) # MTOW em kg
         self.massa_vazia = (1.539331*((self.S)**2)) + 1.341043*(self.S)
         return (MTOW, self.massa_vazia)
 
     def setar_secoes_intermediarias(self):
-        self.coef_interpolation = Modelo.calcula_interpolador(self.envs, self.cordas)
-        self.inter_corda, self.inter_offset, self.inter_envs, self.inter_num_p = Modelo.calcula_secoes(self.wingspan, self.coef_interpolation, self.envs, self.cordas, self.offsets)
+        self.coef_inter_corda = Modelo.calcula_interpolador(self.envs, self.cordas, Modelo.grau_interpolacao_corda)
+        self.coef_inter_offset = Modelo.calcula_interpolador(self.envs, self.offsets, Modelo.grau_interpolacao_offset)
+        self.inter_corda, self.inter_offset, self.inter_envs, self.inter_num_p = Modelo.calcula_secoes(self.wingspan, self.coef_inter_corda, 
+                                                                                                        Modelo.grau_interpolacao_corda, self.coef_inter_offset, Modelo.grau_interpolacao_offset,
+                                                                                                         self.envs, self.cordas, self.offsets)
 
         self.setar_area(self.inter_envs, self.inter_corda)
 
@@ -171,8 +173,11 @@ def calcula_carga_paga(real_env, real_corda, real_offset, limpar=True):
     
     global parametros_temp
     parametros_temp = [_asa.S, _asa.CL, _asa.CD, _asa.massa_vazia]
-    [parametros_temp.append(i) for i in _asa.coef_interpolation]
+    [parametros_temp.append(i) for i in _asa.coef_inter_corda]
+    [parametros_temp.append(i) for i in _asa.coef_inter_offset]
+
     [parametros_temp.append(i) for i in _asa.inter_corda]
+    [parametros_temp.append(i) for i in _asa.inter_offset]
 
     return _asa.carga_paga
 
@@ -206,6 +211,17 @@ def retorna_maior_delta_corda(real_env, real_corda, real_offset):
         
     return delta_temp 
 
+def retorna_menor_delta_offset(real_env, real_corda, real_offset):
+    _asa.setar_secoes(real_env, real_corda, real_offset)
+    _asa.setar_secoes_intermediarias()
+
+    delta_temp = (-1)*math.inf
+    for i in range (0, len(_asa.inter_offset) -1):
+        delta = _asa.inter_offset[i] - _asa.inter_offset[i+1]
+        if delta > delta_temp:
+            delta_temp = delta
+        
+    return delta_temp 
 
 def retorna_delta_envergadura_2(real_env, real_corda, real_offset):
     return (real_env[1]- real_env[0])
@@ -227,6 +243,8 @@ def delta_offset2(real_env, real_corda, real_offset):
 
 def delta_offset3(real_env, real_corda, real_offset):
     return (real_offset[2]-real_offset[1])
+
+
 
 def retorna_parametros():
     return parametros_temp

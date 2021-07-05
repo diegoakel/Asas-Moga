@@ -7,11 +7,11 @@ import interface
 import Modelo
 import analise 
 
-for j in range(0,4): # Grau
+for j in range(0,1): # Grau
     Modelo.grau_interpolacao = j
-    for i in range(1,6): # Execuções
+    for i in range(1,2): # Execuções
         path = f"../Resultados/grau={Modelo.grau_interpolacao}/"
-        label = f"Cobem_poly_{Modelo.grau_interpolacao}_{Modelo.pop_size}_{Modelo.max_gen}_R{i}"
+        label = f"Journal_aero_{Modelo.grau_interpolacao}_{Modelo.pop_size}_{Modelo.max_gen}_R{i}"
         nome_otimizacao = path+label
 
         interface.Otimizacao_Iniciada(nome_otimizacao)
