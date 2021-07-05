@@ -157,9 +157,9 @@ def mtow(self):
             W = (k/(9)) * Modelo.g
             V = math.sqrt((2*W)/(Modelo.rho_ar*self.S*self.CL)) * 1.2 * 0.7
             T = Modelo.a*((V*0.7)**2)+Modelo.b*(V*0.7)+Modelo.c
-            D = 0.5*Modelo.rho_ar*V**2*self.S*self.CD
-            L = 0.5*Modelo.rho_ar*V**2*self.S*self.CL
-            Slo = round((1.44*(W)**(2))/(Modelo.g*Modelo.rho_ar*self.S*self.CL*(T-(D+Modelo.mi_solo*(W-L)))), 2)
+            self.Drag = 0.5*Modelo.rho_ar*V**2*self.S*self.CD
+            self.Lift = 0.5*Modelo.rho_ar*V**2*self.S*self.CL
+            Slo = round((1.44*(W)**(2))/(Modelo.g*Modelo.rho_ar*self.S*self.CL*(T-(self.Drag+Modelo.mi_solo*(W-self.Lift)))), 2)
         
         if Slo > Modelo.comprimento_pista_maxima:
             break    
@@ -180,6 +180,52 @@ def calcula_carga_paga(real_env, real_corda, real_offset, limpar=True):
     [parametros_temp.append(i) for i in _asa.inter_offset]
 
     return _asa.carga_paga
+
+
+def calcula_lift(real_env, real_corda, real_offset, limpar=True):
+    _asa.setar_secoes(real_env, real_corda, real_offset)
+    _asa.analisa(limpar)
+    
+    global parametros_temp
+    parametros_temp = [_asa.S, _asa.CL, _asa.CD, _asa.massa_vazia]
+    [parametros_temp.append(i) for i in _asa.coef_inter_corda]
+    [parametros_temp.append(i) for i in _asa.coef_inter_offset]
+
+    [parametros_temp.append(i) for i in _asa.inter_corda]
+    [parametros_temp.append(i) for i in _asa.inter_offset]
+
+    return _asa.Lift
+
+
+def calcula_drag(real_env, real_corda, real_offset, limpar=True):
+    _asa.setar_secoes(real_env, real_corda, real_offset)
+    _asa.analisa(limpar)
+    
+    global parametros_temp
+    parametros_temp = [_asa.S, _asa.CL, _asa.CD, _asa.massa_vazia]
+    [parametros_temp.append(i) for i in _asa.coef_inter_corda]
+    [parametros_temp.append(i) for i in _asa.coef_inter_offset]
+
+    [parametros_temp.append(i) for i in _asa.inter_corda]
+    [parametros_temp.append(i) for i in _asa.inter_offset]
+
+    return _asa.Drag
+
+
+def calcula_eficiencia(real_env, real_corda, real_offset, limpar=True):
+    _asa.setar_secoes(real_env, real_corda, real_offset)
+    _asa.analisa(limpar)
+    
+    global parametros_temp
+    parametros_temp = [_asa.S, _asa.CL, _asa.CD, _asa.massa_vazia]
+    [parametros_temp.append(i) for i in _asa.coef_inter_corda]
+    [parametros_temp.append(i) for i in _asa.coef_inter_offset]
+
+    [parametros_temp.append(i) for i in _asa.inter_corda]
+    [parametros_temp.append(i) for i in _asa.inter_offset]
+
+    return _asa.Lift/_asa.Drag
+
 
 def retorna_envergadura(real_env, real_corda, real_offset):
     return (2 * real_env[2])
