@@ -29,8 +29,8 @@ a = -0.0126
 b = -0.5248
 c = 40.0248
 alfa_stol = 13.5
-grau_interpolacao_corda = 1
-grau_interpolacao_offset = 1
+grau_interpolacao_corda = 0
+grau_interpolacao_offset = 0
 tipo_problema = 0 # [0,1,2,3,4]
 num_sections = 11
 fator_corretivo = 1.09
@@ -90,15 +90,19 @@ def Avalia_Individuo_Viavel(individuo, n, gen_no):
 
 def pre_checagem(vetor_x):
    if analise.retorna_envergadura(*fake_x(vetor_x)) > envergadura_maxima:
+      print(f"1 - {analise.retorna_envergadura(*fake_x(vetor_x))}")
       return constantes.solucao_inviavel
 
    if analise.retorna_menor_corda(*fake_x(vetor_x)) < corda_minima:
+      print(f"2 - {analise.retorna_menor_corda(*fake_x(vetor_x))}")
       return constantes.solucao_inviavel   
    
    if analise.retorna_maior_delta_corda(*fake_x(vetor_x)) > delta_corda_minima:
+      print(f"3 - {analise.retorna_maior_delta_corda(*fake_x(vetor_x))}")
       return constantes.solucao_inviavel
 
    if analise.retorna_menor_delta_offset(*fake_x(vetor_x)) < delta_offset_minimo:
+      print(f"4 - {analise.retorna_menor_delta_offset(*fake_x(vetor_x))}")
       return constantes.solucao_inviavel
 
    return constantes.solucao_viavel
@@ -135,17 +139,9 @@ def calcula_parametro_interpolado(env_x, coef_interpolation, grau):
       return coef_interpolation[0]*env_x**3 + coef_interpolation[1]*env_x**2 + coef_interpolation[2]*env_x + coef_interpolation[3]
 
 
-def calcula_secoes_segmented(envs, cordas, offsets):
+def calcula_envs_segmented(envs, cordas, offsets):
    inter_num_p = []
-   inter_offset = []
    inter_envs = []
-   inter_corda = []
-
-   for i in range (0, len(cordas)):
-      inter_corda.append(cordas[i])
-
-   for i in range (0, len(offsets)):
-      inter_offset.append(offsets[i])
 
    inter_envs.append(0)
    for i in range (0, len(envs)):
@@ -159,12 +155,25 @@ def calcula_secoes_segmented(envs, cordas, offsets):
 
       inter_num_p.append(inter_num_p[-1])
 
-   return inter_corda, inter_offset, inter_envs, inter_num_p
-   
+   return inter_envs, inter_num_p
 
-def calcula_secoes_polynomial(wingspan, coef_inter_corda, grau_corda, coef_inter_offset, grau_offset):
+def calcula_cordas_segmented(envs, cordas, offsets):
    inter_corda = []
+
+   for i in range (0, len(cordas)):
+      inter_corda.append(cordas[i])
+
+   return inter_corda
+
+def calcula_offsets_segmented(envs, cordas, offsets):
    inter_offset = []
+
+   for i in range (0, len(offsets)):
+      inter_offset.append(offsets[i])
+
+   return inter_offset
+   
+def calcula_envs_polinomial(wingspan):
    inter_envs = []
    inter_num_p = []
 
@@ -172,21 +181,45 @@ def calcula_secoes_polynomial(wingspan, coef_inter_corda, grau_corda, coef_inter
       inter_envs.append(i*wingspan/(2*(num_sections-1)))
 
    for i in range (0, num_sections):
-      inter_corda.append(calcula_parametro_interpolado(inter_envs[i], coef_inter_corda, grau_corda))
-      inter_offset.append(calcula_parametro_interpolado(inter_envs[i], coef_inter_offset, grau_offset))
-
       if i < num_sections - 1:
             delta =  math.ceil((inter_envs[i+1]-inter_envs[i])/comprimento_elemento_env) -1
             inter_num_p.append(max(delta,1))
 
       inter_num_p.append(inter_num_p[-1])
 
-   return inter_corda, inter_offset, inter_envs, inter_num_p
+   return inter_envs, inter_num_p
 
+def calcula_cordas_polinomial(wingspan, inter_envs, coef_inter_corda, grau_corda):
+   inter_corda = []
+
+   for i in range (0, num_sections):
+      inter_corda.append(calcula_parametro_interpolado(inter_envs[i], coef_inter_corda, grau_corda))
+
+   return inter_corda
+
+def calcula_offsets_polinomial(wingspan, inter_envs, coef_inter_offset, grau_offset):
+   inter_offset = []
+
+   for i in range (0, num_sections):
+      inter_offset.append(calcula_parametro_interpolado(inter_envs[i], coef_inter_offset, grau_offset))
+
+   return inter_offset
 
 def calcula_secoes(wingspan, coef_inter_corda, grau_corda, coef_inter_offset, grau_offset, envs, cordas, offsets):
    if grau_corda > 0:
-      return calcula_secoes_polynomial(wingspan, coef_inter_corda, grau_corda, coef_inter_offset, grau_offset)
+      inter_envs, inter_num_p = calcula_envs_polinomial(wingspan)   
+      inter_cordas = calcula_cordas_polinomial(wingspan, inter_envs, coef_inter_corda, grau_corda)
    
    else:
-      return calcula_secoes_segmented(envs, cordas, offsets)
+      inter_envs, inter_num_p = calcula_envs_segmented(envs, cordas, offsets)   
+      inter_cordas = calcula_cordas_segmented(envs, cordas, offsets)
+   
+   if grau_offset > 0:
+      inter_envs, inter_num_p = calcula_envs_polinomial(wingspan)   
+      inter_offset = calcula_offsets_polinomial(wingspan, inter_envs, coef_inter_offset, grau_offset)
+   
+   else:
+      inter_envs, inter_num_p = calcula_envs_segmented(envs, cordas, offsets)   
+      inter_offset = calcula_offsets_segmented(envs, cordas, offsets)
+                
+   return inter_cordas, inter_offset, inter_envs, inter_num_p

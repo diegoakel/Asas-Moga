@@ -1,5 +1,5 @@
 import pandas as pd
-import apoio
+#import apoio
 
 def Evolucao_completada(pop_new):
    print("Evolução finalizada.")

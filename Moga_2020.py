@@ -147,7 +147,7 @@ def Checa_viavel(vetor_x, restricao, g_sinal, g_limite):
    if Viabilidade_Explicita(vetor_x) == constantes.solucao_inviavel:
       return constantes.solucao_inviavel
 
-   if Modelo.pre_checagem(vetor_x) == constantes.solucao_inviavel :
+   if Modelo.pre_checagem(vetor_x) == constantes.solucao_inviavel:
       return constantes.solucao_inviavel
 
    for j in range(0, len(restricao)):

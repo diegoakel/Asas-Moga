@@ -28,11 +28,7 @@ class asa():
         
         self.wingspan = (self.envs[-1]*2)
         self.S = total*2
-        self.AR = self.wingspan**2/self.S
-        self.afil = self.cordas[-1]/self.cordas[0]
-        print (cordas)
-        self.mac = (self.cordas[0]*(2/3)* ((1+self.afil+self.afil**2)/(1+self.afil)))
-
+        
     def escrever_macro(self): 
         escrever_macro(self)
         
@@ -129,6 +125,11 @@ def limpar_arquivos():
 
 def coeficientes(self, limpar):
     self.setar_secoes_intermediarias()
+    
+    self.AR = self.wingspan**2/self.S
+    self.afil = self.cordas[-1]/self.cordas[0]
+    self.mac = (self.cordas[0]*(2/3)* ((1+self.afil+self.afil**2)/(1+self.afil))) 
+    
     self.escrever_macro()
     self.executar_avl()
 
@@ -148,7 +149,7 @@ def coeficientes(self, limpar):
         limpar_arquivos()
     
 
-def mtow(self):    
+def mtow(self):  
     for k in range (0, 270):
         if (self.CL == 0) or (self.S < 0):
             Slo = 2*Modelo.comprimento_pista_maxima
