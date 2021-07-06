@@ -9,6 +9,7 @@ g = 9.81
 rho_ar = 1.225
 mi_solo = 0.025
 
+# teste pedro
 # Parametros do problema
 delta_envergadura_minima = 0.3
 delta_corda_minima = 0
