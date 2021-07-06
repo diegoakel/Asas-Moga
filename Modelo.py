@@ -103,9 +103,9 @@ def pre_checagem(vetor_x):
    return constantes.solucao_viavel
 
 def fake_x(vetor_x):
-   fake_env = [vetor_x[0], vetor_x[1], vetor_x[2]]
-   fake_corda = [vetor_x[3], vetor_x[4], vetor_x[5], vetor_x[6]]
-   fake_offset = [0, vetor_x[7], vetor_x[8], vetor_x[9]]
+   fake_env = [vetor_x[0], vetor_x[0]+ vetor_x[1], vetor_x[0] + vetor_x[1] + vetor_x[2]]
+   fake_corda = [vetor_x[3], vetor_x[3] - vetor_x[4], vetor_x[3] - vetor_x[4] - vetor_x[5], vetor_x[3]- vetor_x[4] - vetor_x[5] - vetor_x[6]]
+   fake_offset = [0, vetor_x[7], vetor_x[7] + vetor_x[8], vetor_x[7] + vetor_x[8] + vetor_x[9]]
 
    return fake_env, fake_corda, fake_offset
 

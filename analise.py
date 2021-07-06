@@ -22,7 +22,6 @@ class asa():
         total = 0
         for i in range(0, len(envs)-1):
             if (i == 0):
-                
                 total += (cordas[i] + cordas[i+1])*(envs[i+1] - envs[i])/2
             else:
                 total += ((cordas[i] + cordas[i+1])*(envs[i+1]-envs[i]))/2      
@@ -31,6 +30,7 @@ class asa():
         self.S = total*2
         self.AR = self.wingspan**2/self.S
         self.afil = self.cordas[-1]/self.cordas[0]
+        print (cordas)
         self.mac = (self.cordas[0]*(2/3)* ((1+self.afil+self.afil**2)/(1+self.afil)))
 
     def escrever_macro(self): 
