@@ -6,7 +6,7 @@ import subprocess as sp
 import Modelo
 import constantes
 
-
+# TESTETSTETSTE
 class asa:
     def __init__(self):
         self.viavel = constantes.solucao_inviavel
