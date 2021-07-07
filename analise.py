@@ -7,7 +7,7 @@ import Modelo
 import constantes
 from dataclasses import dataclass, field
 
-@dataclass (order= True)
+# Removido
 class asa:
     def __init__(self):
         self.viavel = constantes.solucao_inviavel
