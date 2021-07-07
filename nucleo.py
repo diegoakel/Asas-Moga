@@ -6,11 +6,11 @@ import Modelo
 
 for j in range(0, 5):  # Tipo de problema
     Modelo.tipo_problema = j
-    
+
     if j == 4:
         Modelo.num_objetivos = 2
 
-    for i in range(1, 2):  # Execuções
+    for i in range(1, 6):  # Execuções
         path = f"../Resultados/grau={Modelo.tipo_problema}/"
         label = (
             f"Journal_aero_{Modelo.tipo_problema}{Modelo.pop_size}{Modelo.max_gen}_R{i}"
