@@ -193,19 +193,44 @@ def Distancia_Escalar(individuo, p, q):
     return temp ** 0.5
 
 
-def Elitismo(rank):
+def Elitismo(rank, nicho) -> list:
     # print (rank)
     new_solution = []
     for i in range(0, len(rank)):
-        for j in range(0, len(rank)):
-            if (rank[j] == i) and (len(new_solution) < Modelo.pop_size):
-                # print (rank[j])
-                new_solution.append(j)
-                # print (new_solution)
+        if len(new_solution) < Modelo.pop_size:
+            for j in range(0, len(rank)):
+                if rank[j] == i:
+                    new_solution.append(j)
+            if len(new_solution) > Modelo.pop_size:
+                new_solution = filtra_nicho(new_solution, rank, nicho, i)
+
+    return new_solution
+
+
+def pior_nicho(rank, nicho, n_rank) -> int:
+    temp = 0
+    for i in range(0, len(nicho)):
+        if (nicho[temp] > nicho[i]) and (rank[i] == n_rank):
+            temp = i
+
+    return temp
+
+def filtra_nicho(new_solution, rank,  nicho, n_rank) -> list:
+    while len(new_solution) > Modelo.pop_size:
+        temp = pior_nicho(rank, nicho, n_rank)
+        new_solution = [i for x, i in enumerate(new_solution) if x != temp]
+        rank = [i for x, i in enumerate(rank) if x != temp]
+        nicho = [i for x, i in enumerate(nicho) if x != temp]
+
+
     return new_solution
 
 
 def dominated(matriz_function, p, q):
+    """
+    Diz se a solução p domina a solução q. 
+
+    """    
     for i in range(0, len(matriz_function[p])):
 
         if matriz_function[p][i] < matriz_function[q][i]:
@@ -214,6 +239,10 @@ def dominated(matriz_function, p, q):
 
 
 def Rank_pop(matriz_function):
+    """
+    Rankeia a população com base na função objetivo.
+
+    """    
     rank = [0 for i in range(0, len(matriz_function))]
     for p in range(0, len(matriz_function)):
         for q in range(0, len(matriz_function)):
@@ -222,6 +251,34 @@ def Rank_pop(matriz_function):
                 if dom == 0:
                     rank[p] = rank[p] + 1
     return rank
+
+
+def calcula_nicho(individuo, p):
+    """
+    Retorna a distância entre o individuo p e todos os outros individuos
+
+    """    
+    dist_temp = 0
+    for i in range(0, len(individuo)):
+        if i != p:
+            dist_temp = dist_temp + Distancia_Escalar(individuo, p, i)
+
+    return dist_temp
+
+
+def nicho_pop(individuo) -> list:
+    """
+    Calcular nicho já faz o algoritmo passar a ser NSGA-II. 
+
+    O nicho serve para impedir que a fronteira de Pareto fique muito concentrada em uma região, passando a ser
+    mais dispersa.
+
+    """    
+    nicho = [0 for i in range(0, len(individuo))]
+    for p in range(0, len(individuo)):
+        nicho[p] = calcula_nicho(individuo, p)
+
+    return nicho
 
 
 def Criar_NovaGeracao(individuo, new_solution):
@@ -274,7 +331,6 @@ def Avalia_Individuo_Geral(individuo, i, gen_no, geraca_inicial=False):
         objective_penalizado = objetivo
         viavel = constantes.solucao_inviavel
         cont_analise_pre_check[0] += 1
-      #   print(cont_analise_pre_check)
 
         return objetivo, constraint, objective_penalizado, viavel, parameters
 
@@ -392,7 +448,21 @@ def Completa_PopInicial(pop_new):
     return pop_fake + pop_new
 
 
+def limpar_historico():
+    cont_analise_historico[0] = 0
+    cont_analise_nova[0] = 0
+    cont_analise_pre_check[0] = 0
+
+    historico.historico_vetor_x = []
+    historico.historico_objetivo = []
+    historico.historico_constraint = []
+    historico.historico_objective_penalizado = []
+    historico.historico_viavel = []
+    historico.historico_parameters = []
+
+
 def Evolucao(pop_new):
+    limpar_historico()
     pop_new = Completa_PopInicial(pop_new)
     for gen_no in range(0, Modelo.max_gen):
         interface.Geracao_Iniciada(gen_no, pop_new)
@@ -414,8 +484,9 @@ def Evolucao(pop_new):
         )
 
         rank = Rank_pop(objetivos_penalizados)
+        nicho = nicho_pop(individuo)
 
-        new_solution = Elitismo(rank)  # Retorna lista de indexes (os melhores)
+        new_solution = Elitismo(rank, nicho)  # Retorna lista de indexes (os melhores)
 
         interface.Elitismo_Aplicado(rank, new_solution)
 
