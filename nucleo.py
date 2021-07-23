@@ -11,7 +11,7 @@ for j in range(4, 5):  # Tipo de problema
         Modelo.num_objetivos = 2
 
     for i in range(1, 6):  # Execuções
-        path = f"../Resultados/tipo={Modelo.tipo_problema}/"
+        path = f"Resultados/tipo={Modelo.tipo_problema}/"
         label = (
             f"Journal_aero_{Modelo.tipo_problema}_{Modelo.pop_size}_{Modelo.max_gen}_R{i}"
         )

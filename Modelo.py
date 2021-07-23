@@ -68,7 +68,7 @@ g_sinal = [
 ]  ## negativo < lim; positivo > lim
 
 # Labels
-nome_otimizacao = f"Relativo_{pop_size}_{max_gen}_MaxPontuacao_R5"
+# nome_otimizacao = f"Relativo_{pop_size}_{max_gen}_MaxPontuacao_R5"
 
 
 def Avalia_Individuo_Viavel(individuo, n, gen_no):
