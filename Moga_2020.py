@@ -209,7 +209,7 @@ def Elitismo(rank, nicho) -> list:
 
 def pior_nicho(new_solution, rank, nicho, n_rank) -> int:
     temp = 0
-    for i in range(0, len(nicho)):
+    for i in range(0, len(new_solution)):
         if (nicho[new_solution[temp]] > nicho[new_solution[i]]) and (rank[new_solution[i]] == n_rank):
             temp = i
 
