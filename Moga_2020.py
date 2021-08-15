@@ -207,17 +207,17 @@ def Elitismo(rank, nicho) -> list:
     return new_solution
 
 
-def pior_nicho(rank, nicho, n_rank) -> int:
+def pior_nicho(new_solution, rank, nicho, n_rank) -> int:
     temp = 0
     for i in range(0, len(nicho)):
-        if (nicho[temp] > nicho[i]) and (rank[i] == n_rank):
+        if (nicho[new_solution[temp]] > nicho[new_solution[i]]) and (rank[new_solution[i]] == n_rank):
             temp = i
 
     return temp
 
 def filtra_nicho(new_solution, rank,  nicho, n_rank) -> list:
     while len(new_solution) > Modelo.pop_size:
-        temp = pior_nicho(rank, nicho, n_rank)
+        temp = pior_nicho(new_solution, rank, nicho, n_rank)
         new_solution = [i for x, i in enumerate(new_solution) if x != temp]
         rank = [i for x, i in enumerate(rank) if x != temp]
         nicho = [i for x, i in enumerate(nicho) if x != temp]
