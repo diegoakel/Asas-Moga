@@ -16,7 +16,7 @@ import math
 import pdfplumber
 
 
-def ler_logs(arquivo) -> DataFrame:
+def ler_logs(arquivo):
     """
     Lê um dado arquivo de logs raw de otimização e retorna o dataframe equivalente.
     Esse dataframe clean é o utilizado para todas as próximas etapas.
@@ -27,7 +27,8 @@ def ler_logs(arquivo) -> DataFrame:
     :rtype: DataFrame
     """
     df_final = pd.DataFrame()
-    df = pd.read_csv(f"../Resultados/{arquivo}.csv")
+    path = f"../Resultados/{arquivo}.csv"
+    df = pd.read_csv(path)
     df = df.drop("Unnamed: 0", axis=1)
 
     for i in [
@@ -167,7 +168,7 @@ def animacao_pareto(execution=1) -> None:
     df.columns = ["file", "quadro"]
     df["quadro"] = df["quadro"].str.strip(".jpeg").astype(int)
     df = df.sort_values(by=["quadro"])
-    df["file"] = "pareto/" + df["file"]
+    df["file"] = "../pareto/" + df["file"]
 
     images = list(df["file"])
 
@@ -489,7 +490,7 @@ def gerar_relatorios():
 
             df = df[df["viavel"] == 0]
             maximo = df.sort_values(["Geracao", "Pontuacao"]).groupby("Geracao").last()
-            maximo.to_csv(f"maximos/{file}_max_payload.csv")
+            maximo.to_csv(f"../maximos/{file}_max_payload.csv")
 
             maximo = maximo[["Pontuacao"]]
             maximo["File"] = file

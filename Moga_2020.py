@@ -4,6 +4,7 @@ import Modelo
 import constantes
 import historico
 import interface
+from typing import List, Union
 
 cont_analise_historico = [0]
 cont_analise_nova = [0]
@@ -219,8 +220,8 @@ def filtra_nicho(new_solution, rank,  nicho, n_rank) -> list:
     while len(new_solution) > Modelo.pop_size:
         temp = pior_nicho(new_solution, rank, nicho, n_rank)
         new_solution = [i for x, i in enumerate(new_solution) if x != temp]
-        rank = [i for x, i in enumerate(rank) if x != temp]
-        nicho = [i for x, i in enumerate(nicho) if x != temp]
+        # rank = [i for x, i in enumerate(rank) if x != temp]
+        # nicho = [i for x, i in enumerate(nicho) if x != temp]
 
 
     return new_solution

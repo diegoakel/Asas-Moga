@@ -4,7 +4,7 @@ import time
 import interface
 import Modelo
 
-for j in range(0, 5):  # Tipo de problema
+for j in range(4, 5):  # Tipo de problema
     Modelo.tipo_problema = j
 
     if j == 4:
