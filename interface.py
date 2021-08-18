@@ -1,4 +1,5 @@
 import pandas as pd
+import Modelo
 
 # import apoio
 
@@ -36,7 +37,12 @@ def Elitismo_Aplicado(rank, new_solution):
 
 def Otimizacao_Iniciada(label):
     global df
+    global df_pareto
+    global df_sem_filhos
+    
     df = pd.DataFrame()
+    df_pareto = pd.DataFrame()
+    df_sem_filhos = pd.DataFrame()
     # df =  pd.DataFrame(columns=["gen_no", "pop_new", "objetivos", "constraints", "objetivos_penalizados", "viavel", "parameters"])
     print(f"Otimização {label} iniciada.")
 
@@ -72,6 +78,67 @@ def Geracao_Finalizada(
     ]
     df = pd.concat([df, df2])
 
+def Geracao_Finalizada_Pareto(
+    gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel, parameters, rank
+):
+    global df_pareto
+
+    for i in range(0, len(rank)):
+        if rank[i] == 0:
+            dados = [
+                gen_no,
+                pop_new[i],
+                objetivos[i],
+                constraints[i],
+                objetivos_penalizados[i],
+                viavel[i],
+                parameters[i],
+            ]
+
+    
+            df2 = pd.DataFrame(dados).T
+            df2.columns = [
+                "gen_no",
+                "pop_new",
+                "objetivos",
+                "constraints",
+                "objetivos_penalizados",
+                "viavel",
+                "parameters",
+            ]
+
+            df_pareto = pd.concat([df_pareto, df2])
+
+def Geracao_Sem_Filhos(
+    gen_no, pop_new, objetivos, constraints, objetivos_penalizados, viavel, parameters, rank
+):
+    global df_sem_filhos
+
+    for i in range(0, Modelo.pop_size):
+        dados = [
+            gen_no,
+            pop_new[i],
+            objetivos[i],
+            constraints[i],
+            objetivos_penalizados[i],
+            viavel[i],
+            parameters[i],
+        ]
+
+
+        df2 = pd.DataFrame(dados).T
+        df2.columns = [
+            "gen_no",
+            "pop_new",
+            "objetivos",
+            "constraints",
+            "objetivos_penalizados",
+            "viavel",
+            "parameters",
+        ]
+
+        df_sem_filhos = pd.concat([df_sem_filhos, df2])
+
 
 def Otimizacao_Finalizada(
     path, label, total, cont_historico, cont_nova, cont_pre_check
@@ -92,5 +159,6 @@ def Otimizacao_Finalizada(
     print(f"Total de análises novas: {cont_nova}")
     print(f"Total de análises bloqueadas: {cont_pre_check}")
     df.to_csv(f"{completo}.csv")
-
+    df_pareto.to_csv(f"{completo}_pareto.csv")
+    df_sem_filhos.to_csv(f"{completo}_sem_filhos.csv")
     # apoio.gerar_relatorio(label, completo)

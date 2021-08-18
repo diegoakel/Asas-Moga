@@ -213,9 +213,15 @@ def Distancia_Function(matriz_function, p, q, maximos_f, minimos_f) -> float:
     """
     temp = 0
     for i in range(0, len(matriz_function[p])):
-        if (abs(matriz_function[p][i]) != math.inf) and (abs(matriz_function[q][i]) != math.inf):
-            f1_ad = (matriz_function[p][i] - minimos_f[i]) / (maximos_f[i] - minimos_f[i])
-            f2_ad = (matriz_function[q][i] - minimos_f[i]) / (maximos_f[i] - minimos_f[i])
+        if (abs(matriz_function[p][i]) != math.inf) and (
+            abs(matriz_function[q][i]) != math.inf
+        ):
+            f1_ad = (matriz_function[p][i] - minimos_f[i]) / (
+                maximos_f[i] - minimos_f[i]
+            )
+            f2_ad = (matriz_function[q][i] - minimos_f[i]) / (
+                maximos_f[i] - minimos_f[i]
+            )
             temp = temp + (f1_ad - f2_ad) ** 2
     return temp ** 0.5
 
@@ -263,10 +269,14 @@ def calcula_max_min(matriz_function) -> List:
     for i in range(0, len(matriz_function)):
         for j in range(0, len(matriz_function[i])):
 
-            if (maximos[j] < matriz_function[i][j]) and (abs(matriz_function[i][j]) != math.inf):
+            if (maximos[j] < matriz_function[i][j]) and (
+                abs(matriz_function[i][j]) != math.inf
+            ):
                 maximos[j] = matriz_function[i][j]
 
-            if (minimos[j] > matriz_function[i][j]) and (abs(matriz_function[i][j]) != math.inf):
+            if (minimos[j] > matriz_function[i][j]) and (
+                abs(matriz_function[i][j]) != math.inf
+            ):
                 minimos[j] = matriz_function[i][j]
 
     return maximos, minimos
@@ -534,6 +544,7 @@ def Evolucao(pop_new) -> None:
         individuo = pop_new[:]
         filhos = evoluir(individuo, Modelo.x_min, Modelo.x_max)
         individuo = Adicionar_Filhos(individuo, filhos)
+
         objetivos, constraints, objetivos_penalizados, viavel, parameters = Avaliar_Pop(
             individuo, gen_no
         )
@@ -549,6 +560,28 @@ def Evolucao(pop_new) -> None:
         )
 
         rank = Rank_pop(objetivos_penalizados)
+
+        interface.Geracao_Finalizada_Pareto(
+            gen_no,
+            individuo,
+            objetivos,
+            constraints,
+            objetivos_penalizados,
+            viavel,
+            parameters,
+            rank,
+        )
+
+        interface.Geracao_Sem_Filhos(
+            gen_no,
+            individuo,
+            objetivos,
+            constraints,
+            objetivos_penalizados,
+            viavel,
+            parameters,
+            rank,
+        )
 
         new_solution = Elitismo(
             rank, objetivos_penalizados
