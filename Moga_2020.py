@@ -111,14 +111,14 @@ def mutation(solution):
     return solution
 
 
-def criar_individuo_random(x_min, x_max):
+def criar_individuo_random(x_min, x_max) -> List[List[float]]:
     individuo = []
     for i in range(0, len(x_min)):
         individuo.append(x_min[i] + (x_max[i] - x_min[i]) * random.random())
     return individuo
 
 
-def arredondarpop(matriz_pop, x_res):
+def arredondarpop(matriz_pop, x_res) -> List[List[List[float]]]:
     for i in range(0, len(matriz_pop)):
         for j in range(0, len(x_res)):
             matriz_pop[i][j] = round(matriz_pop[i][j], x_res[j])
@@ -137,7 +137,7 @@ def evoluir(matriz_variaveis, x_min, x_max):
     return filhos
 
 
-def Buscar_Ind_Distante(matriz_variaveis, p):
+def Buscar_Ind_Distante(matriz_variaveis, p) -> int:
     dist_temp = 0
     i_temp = 0
     for i in range(0, len(matriz_variaveis)):
@@ -149,7 +149,7 @@ def Buscar_Ind_Distante(matriz_variaveis, p):
     return i_temp
 
 
-def Penalizacao(objetivo, restricao, g_sinal, g_limite, fatores_pen):
+def Penalizacao(objetivo, restricao, g_sinal, g_limite, fatores_pen) -> List[float]:
     objetivo_pen = objetivo[:]
     for i in range(0, len(objetivo)):
         for j in range(0, len(restricao)):
@@ -160,7 +160,7 @@ def Penalizacao(objetivo, restricao, g_sinal, g_limite, fatores_pen):
     return objetivo_pen
 
 
-def Checa_viavel(vetor_x, restricao, g_sinal, g_limite):
+def Checa_viavel(vetor_x, restricao, g_sinal, g_limite) -> int:
     if Viabilidade_Explicita(vetor_x) == constantes.solucao_inviavel:
         return constantes.solucao_inviavel
 
@@ -174,14 +174,14 @@ def Checa_viavel(vetor_x, restricao, g_sinal, g_limite):
     return constantes.solucao_viavel
 
 
-def Viabilidade_Explicita(vetor_x):
+def Viabilidade_Explicita(vetor_x) -> int:
     for i in range(0, len(vetor_x)):
         if vetor_x[i] < Modelo.x_min[i] or vetor_x[i] > Modelo.x_max[i]:
             return constantes.solucao_inviavel  # não viável
     return constantes.solucao_viavel  # viável
 
 
-def Distancia_Escalar(individuo, p, q):
+def Distancia_Escalar(individuo, p, q) -> float:
     temp = 0
     for i in range(0, len(Modelo.x_min)):
         x1_ad = (individuo[p][i] - Modelo.x_min[i]) / (
@@ -194,7 +194,33 @@ def Distancia_Escalar(individuo, p, q):
     return temp ** 0.5
 
 
-def Elitismo(rank, nicho) -> list:
+def Distancia_Function(matriz_function, p, q, maximos_f, minimos_f) -> float:
+    """
+    Calcula a distância entre as funções objetivos de dois pontos da população.
+
+    :param matriz_function: funções objetivo
+    :type matriz_function: List[List[float]]
+    :param p: Ponto A
+    :type p: int
+    :param q: Ponto B
+    :type q: int
+    :param maximos_f: Maximo das funções objetivo
+    :type maximos_f: float
+    :param minimos_f: Mínimo das funções objetivo
+    :type minimos_f: float
+    :return: Distância
+    :rtype: float
+    """
+    temp = 0
+    for i in range(0, len(matriz_function[p])):
+        if (abs(matriz_function[p][i]) != math.inf) and (abs(matriz_function[q][i]) != math.inf):
+            f1_ad = (matriz_function[p][i] - minimos_f[i]) / (maximos_f[i] - minimos_f[i])
+            f2_ad = (matriz_function[q][i] - minimos_f[i]) / (maximos_f[i] - minimos_f[i])
+            temp = temp + (f1_ad - f2_ad) ** 2
+    return temp ** 0.5
+
+
+def Elitismo(rank, matriz_function) -> list:
     # print (rank)
     new_solution = []
     for i in range(0, len(rank)):
@@ -203,35 +229,70 @@ def Elitismo(rank, nicho) -> list:
                 if rank[j] == i:
                     new_solution.append(j)
             if len(new_solution) > Modelo.pop_size:
-                new_solution = filtra_nicho(new_solution, rank, nicho, i)
+                new_solution = filtra_nicho(new_solution, rank, matriz_function, i)
 
     return new_solution
 
 
-def pior_nicho(new_solution, rank, nicho, n_rank) -> int:
-    temp = 0
+def pior_nicho(
+    new_solution, rank, matriz_function, n_rank, maximos_f, minimos_f
+) -> int:
+    nicho = nicho_pop(matriz_function, rank, maximos_f, minimos_f)
+    i_temp = 0
     for i in range(0, len(new_solution)):
-        if (nicho[new_solution[temp]] > nicho[new_solution[i]]) and (rank[new_solution[i]] == n_rank):
-            temp = i
+        if (nicho[new_solution[i]] < nicho[new_solution[i_temp]]) and (
+            rank[new_solution[i]] == n_rank
+        ):
+            i_temp = i
 
-    return temp
+    return i_temp
 
-def filtra_nicho(new_solution, rank,  nicho, n_rank) -> list:
+
+def calcula_max_min(matriz_function) -> List:
+    """
+    Cálcula o maximo e mínimo das funções objetivo
+
+    :param matriz_function: funções objetivo
+    :type matriz_function: List[List[float]]
+    :return: Listas de máximos e mínimos das funções objetivos
+    :rtype: List
+    """
+    maximos = [-1 * math.inf] * len(matriz_function[0])
+    minimos = [1 * math.inf] * len(matriz_function[0])
+
+    for i in range(0, len(matriz_function)):
+        for j in range(0, len(matriz_function[i])):
+
+            if (maximos[j] < matriz_function[i][j]) and (abs(matriz_function[i][j]) != math.inf):
+                maximos[j] = matriz_function[i][j]
+
+            if (minimos[j] > matriz_function[i][j]) and (abs(matriz_function[i][j]) != math.inf):
+                minimos[j] = matriz_function[i][j]
+
+    return maximos, minimos
+
+
+def filtra_nicho(new_solution, rank, matriz_function, n_rank) -> List:
+    """
+    Não só essa função, mas a estratégia de Nicho em si serve para cuidar da disperção da fronteira de Pareto.
+    Impedindo que fique muito concentrada em uma região e perca os limites extremos.
+
+    """
+    maximos_f, minimos_f = calcula_max_min(matriz_function)
     while len(new_solution) > Modelo.pop_size:
-        temp = pior_nicho(new_solution, rank, nicho, n_rank)
+        temp = pior_nicho(
+            new_solution, rank, matriz_function, n_rank, maximos_f, minimos_f
+        )
         new_solution = [i for x, i in enumerate(new_solution) if x != temp]
-        # rank = [i for x, i in enumerate(rank) if x != temp]
-        # nicho = [i for x, i in enumerate(nicho) if x != temp]
-
 
     return new_solution
 
 
-def dominated(matriz_function, p, q):
+def dominated(matriz_function, p, q) -> int:
     """
-    Diz se a solução p domina a solução q. 
+    Diz se a solução p domina a solução q.
 
-    """    
+    """
     for i in range(0, len(matriz_function[p])):
 
         if matriz_function[p][i] < matriz_function[q][i]:
@@ -239,11 +300,11 @@ def dominated(matriz_function, p, q):
     return 0
 
 
-def Rank_pop(matriz_function):
+def Rank_pop(matriz_function) -> List[int]:
     """
     Rankeia a população com base na função objetivo.
 
-    """    
+    """
     rank = [0 for i in range(0, len(matriz_function))]
     for p in range(0, len(matriz_function)):
         for q in range(0, len(matriz_function)):
@@ -254,42 +315,45 @@ def Rank_pop(matriz_function):
     return rank
 
 
-def calcula_nicho(individuo, p):
+def calcula_nicho(matriz_function, rank, p, maximos_f, minimos_f) -> float:
     """
-    Retorna a distância entre o individuo p e todos os outros individuos
+    Retorna a distância entre o individuo p e todos os outros individuos.
+    Somente para individuos no mesmo rank.
 
-    """    
+    """
     dist_temp = 0
-    for i in range(0, len(individuo)):
-        if i != p:
-            dist_temp = dist_temp + Distancia_Escalar(individuo, p, i)
+    for i in range(0, len(matriz_function)):
+        if (i != p) and (rank[i] == rank[p]):
+            dist_temp = dist_temp + Distancia_Function(
+                matriz_function, p, i, maximos_f, minimos_f
+            )
 
     return dist_temp
 
 
-def nicho_pop(individuo) -> list:
+def nicho_pop(matriz_function, rank, maximos_f, minimos_f) -> List:
     """
-    Calcular nicho já faz o algoritmo passar a ser NSGA-II. 
+    Calcular nicho já faz o algoritmo passar a ser NSGA-II.
 
     O nicho serve para impedir que a fronteira de Pareto fique muito concentrada em uma região, passando a ser
     mais dispersa.
 
-    """    
-    nicho = [0 for i in range(0, len(individuo))]
-    for p in range(0, len(individuo)):
-        nicho[p] = calcula_nicho(individuo, p)
+    """
+    nicho = [math.inf for i in range(0, len(matriz_function))]
+    for p in range(0, len(matriz_function)):
+        nicho[p] = calcula_nicho(matriz_function, rank, p, maximos_f, minimos_f)
 
     return nicho
 
 
-def Criar_NovaGeracao(individuo, new_solution):
+def Criar_NovaGeracao(individuo, new_solution) -> List[List[float]]:
     individuo_new = []
     for i in range(0, len(new_solution)):
         individuo_new.append(individuo[new_solution[i]])
     return individuo_new
 
 
-def Adicionar_Filhos(individuo, filhos):
+def Adicionar_Filhos(individuo, filhos) -> List[List[float]]:
     for i in range(0, len(filhos)):
         individuo.append(filhos[i])
     return individuo
@@ -394,7 +458,7 @@ def Avaliar_Pop(individuo, gen_no, geraca_inicial=False):
     )
 
 
-def limpa_populacao_inviavel(populacao, function_viavel):
+def limpa_populacao_inviavel(populacao, function_viavel) -> List[List[List[float]]]:
     for i in range(len(function_viavel) - 1, -1, -1):
         if function_viavel[i] == 1:
             del populacao[i]
@@ -449,7 +513,7 @@ def Completa_PopInicial(pop_new):
     return pop_fake + pop_new
 
 
-def limpar_historico():
+def limpar_historico() -> None:
     cont_analise_historico[0] = 0
     cont_analise_nova[0] = 0
     cont_analise_pre_check[0] = 0
@@ -462,7 +526,7 @@ def limpar_historico():
     historico.historico_parameters = []
 
 
-def Evolucao(pop_new):
+def Evolucao(pop_new) -> None:
     limpar_historico()
     pop_new = Completa_PopInicial(pop_new)
     for gen_no in range(0, Modelo.max_gen):
@@ -485,9 +549,10 @@ def Evolucao(pop_new):
         )
 
         rank = Rank_pop(objetivos_penalizados)
-        nicho = nicho_pop(individuo)
 
-        new_solution = Elitismo(rank, nicho)  # Retorna lista de indexes (os melhores)
+        new_solution = Elitismo(
+            rank, objetivos_penalizados
+        )  # Retorna lista de indexes (os melhores)
 
         interface.Elitismo_Aplicado(rank, new_solution)
 

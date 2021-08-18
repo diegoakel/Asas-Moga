@@ -32,7 +32,7 @@ porcentagem_viavel_primeira_geracao = 0.5
 tolerancia_nova_analise = 0
 
 # Modelo do problema
-no_objetivo = 1
+no_objetivo = 2
 no_restricoes = 4
 no_parameters = 4
 tipo_problema = 0
@@ -101,7 +101,7 @@ def Avalia_Individuo_Viavel(individuo, n, gen_no):
     return objective, constraint, parameters
 
 
-def pre_checagem(vetor_x):
+def pre_checagem(vetor_x) -> int:
     if analise.retorna_envergadura(*fake_x(vetor_x)) > envergadura_maxima:
         return constantes.solucao_inviavel
 
