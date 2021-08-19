@@ -1,5 +1,6 @@
 import analise
 import constantes
+from typing import List, Union
 
 # Parametros Ambientais
 g = 9.81
@@ -72,6 +73,20 @@ g_sinal = [
 
 
 def Avalia_Individuo_Viavel(individuo, n, gen_no):
+    """
+    Caso o indivíduo seja viável, essa função avalia o indivíduo através do módulo de analise.
+
+    As diferentes funções objetivos são calculadas aqui.
+
+    :param individuo: População
+    :type individuo: List[List[float]]
+    :param n: Index do indivíduo na população.
+    :type n: int
+    :param gen_no: Número da geração.
+    :type gen_no: int
+    :return: Valores de objetivo, parametros e restrições.
+    :rtype: List[float]
+    """    
     objective = []
     constraint = []
 
@@ -102,6 +117,14 @@ def Avalia_Individuo_Viavel(individuo, n, gen_no):
 
 
 def pre_checagem(vetor_x) -> int:
+    """
+    Verifica se o vetor x está dentro dos limites.
+
+    :param vetor_x: Indivíduo a ser checado.
+    :type vetor_x: List[float]
+    :return: Viabilidade do indivíduo. 1 ou 0.
+    :rtype: int
+    """    
     if analise.retorna_envergadura(*fake_x(vetor_x)) > envergadura_maxima:
         return constantes.solucao_inviavel
 
@@ -118,6 +141,14 @@ def pre_checagem(vetor_x) -> int:
 
 
 def fake_x(vetor_x):
+    """
+    Cria o fake_vetor_x, que são as listas de geometria.
+
+    :param vetor_x: Indivíduo.
+    :type vetor_x: List[float]
+    :return: Listas de valores de geometria, corda, offset e envergadura.
+    :rtype: List[float]
+    """    
     fake_env = [
         vetor_x[0],
         vetor_x[0] + vetor_x[1],

@@ -148,7 +148,7 @@ def Buscar_Ind_Distante(matriz_variaveis, p) -> int:
     :type p: List[float]
     :return: Posição do indivíduo mais distante.
     :rtype: int
-    """    
+    """
     dist_temp = 0
     i_temp = 0
     for i in range(0, len(matriz_variaveis)):
@@ -158,7 +158,8 @@ def Buscar_Ind_Distante(matriz_variaveis, p) -> int:
                 i_temp = i
                 dist_temp = temp
     return i_temp
-    
+
+
 def Distancia_Escalar(individuo, p, q) -> float:
     temp = 0
     for i in range(0, len(Modelo.x_min)):
@@ -170,6 +171,7 @@ def Distancia_Escalar(individuo, p, q) -> float:
         )
         temp = temp + (x1_ad - x2_ad) ** 2
     return temp ** 0.5
+
 
 def Penalizacao(objetivo, restricao, g_sinal, g_limite, fatores_pen) -> List[float]:
     objetivo_pen = objetivo[:]
@@ -202,7 +204,19 @@ def Viabilidade_Explicita(vetor_x) -> int:
             return constantes.solucao_inviavel  # não viável
     return constantes.solucao_viavel  # viável
 
+
 def Elitismo(rank, matriz_function) -> list:
+    """
+    Seleciona os melhores indivíduos da população.
+
+    :param rank: Vetor de rank dos indivíduos.
+    :type rank: List[int]
+    :param matriz_function: Matriz de funções objetivo.
+    :type matriz_function: List[List[float]]
+    :return: Matriz de indivíduos selecionados.
+    :rtype: List[List[float]]
+
+    """
     # print (rank)
     new_solution = []
     for i in range(0, len(rank)):
@@ -211,10 +225,12 @@ def Elitismo(rank, matriz_function) -> list:
                 if rank[j] == i:
                     new_solution.append(j)
             if len(new_solution) > Modelo.pop_size:
-                new_solution = nicho.filtra_nicho(new_solution, rank, matriz_function, i)
-
+                # print (i)
+                new_solution = nicho.filtra_nicho(
+                    new_solution, rank, matriz_function, i
+                )
+                
     return new_solution
-
 
 
 def dominated(matriz_function, p, q) -> int:
@@ -471,9 +487,7 @@ def Evolucao(pop_new) -> None:
             rank,
         )
 
-        new_solution = Elitismo(
-            rank, objetivos_penalizados
-        )  # Retorna lista de indexes (os melhores)
+        new_solution = Elitismo(rank, objetivos_penalizados)
 
         interface.Elitismo_Aplicado(rank, new_solution)
 
