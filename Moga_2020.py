@@ -233,13 +233,19 @@ def Elitismo(rank, matriz_function) -> list:
     return new_solution
 
 
+
+def same_point(matriz_function, p, q) -> int:
+    for i in range(0, len(matriz_function[p])):
+        if matriz_function[p][i] != matriz_function[q][i]:
+            return 1
+    return 0    
+
 def dominated(matriz_function, p, q) -> int:
     """
     Diz se a solução p domina a solução q.
 
-    """
+    """   
     for i in range(0, len(matriz_function[p])):
-
         if matriz_function[p][i] < matriz_function[q][i]:
             return 1
     return 0
@@ -256,7 +262,8 @@ def Rank_pop(matriz_function) -> List[int]:
             if p != q:
                 dom = dominated(matriz_function, p, q)
                 if dom == 0:
-                    rank[p] = rank[p] + 1
+                    if same_point(matriz_function, p, q) == 1:
+                        rank[p] = rank[p] + 1
     return rank
 
 
@@ -274,7 +281,7 @@ def Adicionar_Filhos(individuo, filhos) -> List[List[float]]:
 
 
 def Avalia_Individuo_NãoViavel():
-    objective = [math.inf for i in range(0, Modelo.no_objetivo)]
+    objective = [math.inf for i in range(0, Modelo.no_objetivos)]
     constraint = [0 for i in range(0, len(Modelo.g_limite))]
     parameters = [0 for i in range(0, Modelo.no_parameters)]
 
@@ -447,45 +454,18 @@ def Evolucao(pop_new) -> None:
         interface.Geracao_Iniciada(gen_no, pop_new)
         individuo = pop_new[:]
         filhos = evoluir(individuo, Modelo.x_min, Modelo.x_max)
-        individuo = Adicionar_Filhos(individuo, filhos)
+        if gen_no < Modelo.max_gen - 1: 
+            individuo = Adicionar_Filhos(individuo, filhos)
 
         objetivos, constraints, objetivos_penalizados, viavel, parameters = Avaliar_Pop(
             individuo, gen_no
         )
 
-        interface.Geracao_Finalizada(
-            gen_no,
-            individuo,
-            objetivos,
-            constraints,
-            objetivos_penalizados,
-            viavel,
-            parameters,
-        )
-
         rank = Rank_pop(objetivos_penalizados)
 
-        interface.Geracao_Finalizada_Pareto(
-            gen_no,
-            individuo,
-            objetivos,
-            constraints,
-            objetivos_penalizados,
-            viavel,
-            parameters,
-            rank,
-        )
-
-        interface.Geracao_Sem_Filhos(
-            gen_no,
-            individuo,
-            objetivos,
-            constraints,
-            objetivos_penalizados,
-            viavel,
-            parameters,
-            rank,
-        )
+        interface.Geracao_Finalizada(gen_no, individuo, objetivos, constraints, objetivos_penalizados, viavel, parameters, rank)
+        interface.Geracao_Finalizada_Pareto(gen_no, individuo, objetivos, constraints, objetivos_penalizados, viavel, parameters, rank)
+        interface.Geracao_Sem_Filhos(gen_no, individuo, objetivos, constraints, objetivos_penalizados, viavel, parameters, rank)
 
         new_solution = Elitismo(rank, objetivos_penalizados)
 

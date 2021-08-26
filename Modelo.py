@@ -31,9 +31,10 @@ taxa_mutacao = 0.04
 max_gen = 300
 porcentagem_viavel_primeira_geracao = 0.5
 tolerancia_nova_analise = 0
+raio_nicho = 0.15
 
 # Modelo do problema
-no_objetivo = 2
+no_objetivos = 2
 no_restricoes = 4
 no_parameters = 4
 tipo_problema = 0

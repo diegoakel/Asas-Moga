@@ -8,8 +8,9 @@ def Otimizacao():
     for j in range(4, 5):  # Tipo de problema
         Modelo.tipo_problema = j
 
+        Modelo.no_objetivos = 1
         if j == 4:
-            Modelo.num_objetivos = 2
+            Modelo.no_objetivos = 2
 
         for i in range(1, 2):  # Execuções
             path = f"Resultados/tipo={Modelo.tipo_problema}/"
