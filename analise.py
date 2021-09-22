@@ -7,8 +7,7 @@ import Modelo
 import constantes
 from dataclasses import dataclass, field
 
-# Removido
-class asa:
+class Asa:
     def __init__(self):
         self.viavel = constantes.solucao_inviavel
 
@@ -38,20 +37,185 @@ class asa:
         self.mi = Modelo.mi_solo
         self.pista_total = Modelo.comprimento_pista_maxima
 
-    def file_and_commands(self, alfa_stol=13.5):  # Não mexer nisso~
-        file_and_commands(self, alfa_stol)
+    # def file_and_commands(self, alfa_stol=13.5):
+    #     num_p1 = math.ceil(self.envs[0] / Modelo.comprimento_elemento_env) - 1
+    #     num_p2 = (
+    #         math.ceil((self.envs[1] - self.envs[0]) / Modelo.comprimento_elemento_env) - 1
+    #     )
+    #     num_p3 = (
+    #         math.ceil((self.envs[2] - self.envs[1]) / Modelo.comprimento_elemento_env) - 1
+    #     )
+
+    #     o = open("asa.avl", "w")
+    #     o.write(
+    #         " Urutau 2020 (2)\n"
+    #         + "0.0                                 | Mach\n"
+    #         + "0     0     0.0                     | iYsym  iZsym  Zsym\n"
+    #         + "%f     %f     %f   | Sref   Cref   Bref\n"
+    #         % (self.S, self.mac, self.wingspan)
+    #         + "0.00000     0.00000     0.00000   | Xref   Yref   Zref\n"
+    #         + "0.00                               | CDp  (optional)\n"
+    #         + "SURFACE                      | (keyword)\n"
+    #         + "Main Wing\n"
+    #         + f"{Modelo.num_elementos_corda}        1.0\n"
+    #         + "INDEX                        | (keyword)\n"
+    #         + "1814                         | Lsurf\n"
+    #         + "YDUPLICATE\n"
+    #         + "0.0\n"
+    #         + "SCALE\n"
+    #         + "1.0  1.0  1.0\n"
+    #         + "TRANSLATE\n"
+    #         + "0.0  0.0  0.0\n"
+    #         + "ANGLE\n"
+    #         + "0.000                         | dAinc\n"
+    #         + "SECTION                                              |  (keyword)\n"
+    #         + f"0.0000    0.0000    0.0000    %f   0.000    {num_p1}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n"
+    #         % (self.cordas[0])
+    #         + "AFIL 0.0 1.0\n"
+    #         + "airfoil.dat\n"
+    #         + "SECTION                                                     |  (keyword)\n"
+    #         + f"%f    %f    0.0000    %f   0.000    {num_p2}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n"
+    #         % (self.offsets[0], self.envs[0], self.cordas[1])
+    #         + "AFIL 0.0 1.0\n"
+    #         + "airfoil.dat\n"
+    #         + "SECTION                                                     |  (keyword)\n"
+    #         + f"%f   %f    0.0000    %f   0.000   {num_p3}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n"
+    #         % (self.offsets[1], self.envs[1], self.cordas[2])
+    #         + "AFIL 0.0 1.0\n"
+    #         + "airfoil.dat \n"
+    #         + "SECTION                                                     |  (keyword)\n"
+    #         + "%f    %f    0.0000    %f   0.000   13    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n"
+    #         % (self.offsets[2], self.envs[2], self.cordas[3])
+    #         + "AFIL 0.0 1.0\n"
+    #         + "airfoil.dat \n"
+    #     )
+    #     o.close()
+
+    #     commands = open("comandos.avl", "w")
+    #     commands.write(
+    #         "load asa.avl\n"
+    #         + "oper\n"
+    #         + "a\n"
+    #         + "a %f\n" % (alfa_stol)
+    #         + "x\n"
+    #         + "ft\n"
+    #         + "resultado.txt\n"
+    #         + "quit"
+    #     )
+    #     commands.close()
 
     def escrever_macro(self):
-        escrever_macro(self)
+        file = f"""Urutau 2020 (2) 
+        0.0                                 | Mach 
+        0     0     0.0                     | iYsym  iZsym  Zsym
+        {self.S}    {self.mac}     {self.wingspan}   | Sref   Cref   Bref 
+        0.00000     0.00000     0.00000   | Xref   Yref   Zref
+        0.00                               | CDp  (optional)
+        SURFACE                      | (keyword)
+        Main Wing
+        {Modelo.num_elementos_corda}        1.0
+        INDEX                        | (keyword)
+        1814                         | Lsurf
+        YDUPLICATE
+        0.0
+        SCALE
+        1.0  1.0  1.0
+        TRANSLATE
+        0.0  0.0  0.0
+        ANGLE
+        0.000                         | dAinc"""
+
+        for i in range(0, len(self.inter_envs)):
+            section = f"""\nSECTION                                              |  (keyword)
+            {self.inter_offset[i]}    {self.inter_envs[i]}   0.0000    {self.inter_corda[i]}  0.000    {self.inter_num_p[i]}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]
+            AFIL 0.0 1.0
+            airfoil.dat \n"""
+
+            file = file + section
+
+        o = open("asa.avl", "w")
+        o.write(file)
+        o.close()
 
     def executar_avl(self):
-        executar_avl(self)
+        """
+        Abre e executa os comandos no AVL.
+        """        
+        commands = open("comandos.avl", "w")
+        commands.write(
+            "load asa.avl\n"
+            + "oper\n"
+            + "a\n"
+            + "a %f\n" % (Modelo.alfa_stol)
+            + "x\n"
+            + "ft\n"
+            + "resultado.txt\n"
+            + "quit"
+        )
+        commands.close()
+
+        run_avl_command = "avl.exe<" + "comandos.avl"
+        os.popen(run_avl_command).read()
 
     def coeficientes(self, limpar):
-        coeficientes(self, limpar)
+        """
+        Calcula os coeficientes aerodinâmicos
+
+        :param limpar: Se deseja limpar os arquivos'
+        :type limpar: Boolean
+        """
+        self.inter_corda = self.cordas
+        self.inter_envs = [0]
+        self.inter_offset = [0]
+        self.inter_num_p = [11, 11, 11, 11]
+        [self.inter_envs.append(item) for item in self.envs]
+        [self.inter_offset.append(item) for item in self.offsets]
+        self.escrever_macro()
+        self.executar_avl()
+
+        results = (open("resultado.txt")).readlines()
+
+        coefficients = []
+        for line in results:
+            matches = re.findall(r"\d\.\d\d\d\d", line)
+            for value in matches:
+                coefficients.append(float(value))
+
+        self.CD = coefficients[-7]
+        self.CL = coefficients[-8]
+        self.e = coefficients[-1]
+
+        if limpar:
+            limpar_arquivos()
 
     def mtow(self):
-        return mtow(self)
+        for k in range(0, 270):
+            if (self.CL == 0) or (self.S < 0):
+                Slo = 2 * Modelo.comprimento_pista_maxima
+                W = 0
+            else:
+                W = (k / (9)) * Modelo.g
+                V = math.sqrt((2 * W) / (Modelo.rho_ar * self.S * self.CL)) * 1.2 * 0.7
+                T = Modelo.a * ((V * 0.7) ** 2) + Modelo.b * (V * 0.7) + Modelo.c
+                self.Drag = 0.5 * Modelo.rho_ar * V ** 2 * self.S * self.CD
+                self.Lift = 0.5 * Modelo.rho_ar * V ** 2 * self.S * self.CL
+                Slo = round(
+                    (1.44 * (W) ** (2))
+                    / (
+                        Modelo.g
+                        * Modelo.rho_ar
+                        * self.S
+                        * self.CL
+                        * (T - (self.Drag + Modelo.mi_solo * (W - self.Lift)))
+                    ),
+                    2,
+                )
+
+            if Slo > Modelo.comprimento_pista_maxima:
+                break
+
+        self.W = W  # MTOW em Newton
+        return W
 
     def calc_carga_paga(self):
         self.MTOW = self.calc_massa()[0]
@@ -67,207 +231,13 @@ class asa:
         self.mtow()
         self.calc_carga_paga()
 
-    def analisa_old(self):
-        # Calculos para situação de stol
-        self.coeficientes(self.alfa_stol)
-        self.mtow()
-        self.calc_pontuacao()
-
-        # Calculos para a polar
-        self.CD_lista = []
-        self.CL_lista = []
-        self.e_lista = []
-        self.alfa_lista = []
-
-        # for i in range(13, 14, 1):
-        #     self.coeficientes(i)
-        #     self.CD_lista.append(self.CD)
-        #     self.CL_lista.append(self.CL)
-        #     self.e_lista.append(self.e)
-        #     self.alfa_lista.append(i)
-
-        data = [
-            self.S,
-            self.wingspan,
-            self.AR,
-            self.afil,
-            self.MTOW,
-            self.carga_paga,
-            self.pontuacao,
-            self.alfa_lista,
-            self.CD_lista,
-            self.CL_lista,
-        ]
-
-        return data
-
     def calc_massa(self):
         MTOW = (self.W / Modelo.g) / Modelo.fator_corretivo  # MTOW em kg
         self.massa_vazia = (1.539331 * ((self.S) ** 2)) + 1.341043 * (self.S)
         return (MTOW, self.massa_vazia)
 
-    def calc_massa_old(self):
-        fator_corretivo = 1.09
-        MTOW = (self.W / self.g) / fator_corretivo  # MTOW em kg
-        self.massa_vazia = (1.539331 * ((self.S) ** 2)) + 1.341043 * (self.S)
-        return (MTOW, self.massa_vazia)
 
-
-_asa = asa()
-
-
-def file_and_commands(self, alfa_stol):  # Não mexer nisso~
-    num_p1 = math.ceil(self.envs[0] / Modelo.comprimento_elemento_env) - 1
-    num_p2 = (
-        math.ceil((self.envs[1] - self.envs[0]) / Modelo.comprimento_elemento_env) - 1
-    )
-    num_p3 = (
-        math.ceil((self.envs[2] - self.envs[1]) / Modelo.comprimento_elemento_env) - 1
-    )
-
-    o = open("asa.avl", "w")
-    o.write(
-        " Urutau 2020 (2)\n"
-        + "0.0                                 | Mach\n"
-        + "0     0     0.0                     | iYsym  iZsym  Zsym\n"
-        + "%f     %f     %f   | Sref   Cref   Bref\n"
-        % (self.S, self.mac, self.wingspan)
-        + "0.00000     0.00000     0.00000   | Xref   Yref   Zref\n"
-        + "0.00                               | CDp  (optional)\n"
-        + "SURFACE                      | (keyword)\n"
-        + "Main Wing\n"
-        + f"{Modelo.num_elementos_corda}        1.0\n"
-        + "INDEX                        | (keyword)\n"
-        + "1814                         | Lsurf\n"
-        + "YDUPLICATE\n"
-        + "0.0\n"
-        + "SCALE\n"
-        + "1.0  1.0  1.0\n"
-        + "TRANSLATE\n"
-        + "0.0  0.0  0.0\n"
-        + "ANGLE\n"
-        + "0.000                         | dAinc\n"
-        + "SECTION                                              |  (keyword)\n"
-        + f"0.0000    0.0000    0.0000    %f   0.000    {num_p1}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n"
-        % (self.cordas[0])
-        + "AFIL 0.0 1.0\n"
-        + "airfoil.dat\n"
-        + "SECTION                                                     |  (keyword)\n"
-        + f"%f    %f    0.0000    %f   0.000    {num_p2}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n"
-        % (self.offsets[0], self.envs[0], self.cordas[1])
-        + "AFIL 0.0 1.0\n"
-        + "airfoil.dat\n"
-        + "SECTION                                                     |  (keyword)\n"
-        + f"%f   %f    0.0000    %f   0.000   {num_p3}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n"
-        % (self.offsets[1], self.envs[1], self.cordas[2])
-        + "AFIL 0.0 1.0\n"
-        + "airfoil.dat \n"
-        + "SECTION                                                     |  (keyword)\n"
-        + "%f    %f    0.0000    %f   0.000   13    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]\n"
-        % (self.offsets[2], self.envs[2], self.cordas[3])
-        + "AFIL 0.0 1.0\n"
-        + "airfoil.dat \n"
-    )
-    o.close()
-
-    commands = open("comandos.avl", "w")
-    commands.write(
-        "load asa.avl\n"
-        + "oper\n"
-        + "a\n"
-        + "a %f\n" % (alfa_stol)
-        + "x\n"
-        + "ft\n"
-        + "resultado.txt\n"
-        + "quit"
-    )
-    commands.close()
-
-
-def executar_avl(self):
-    commands = open("comandos.avl", "w")
-    commands.write(
-        "load asa.avl\n"
-        + "oper\n"
-        + "a\n"
-        + "a %f\n" % (Modelo.alfa_stol)
-        + "x\n"
-        + "ft\n"
-        + "resultado.txt\n"
-        + "quit"
-    )
-    commands.close()
-
-    run_avl_command = "avl.exe<" + "comandos.avl"
-    os.popen(run_avl_command).read()
-
-
-def escrever_macro(self):  # Não mexer nisso~
-    file = f"""Urutau 2020 (2) 
-    0.0                                 | Mach 
-    0     0     0.0                     | iYsym  iZsym  Zsym
-    {self.S}    {self.mac}     {self.wingspan}   | Sref   Cref   Bref 
-    0.00000     0.00000     0.00000   | Xref   Yref   Zref
-    0.00                               | CDp  (optional)
-    SURFACE                      | (keyword)
-    Main Wing
-    {Modelo.num_elementos_corda}        1.0
-    INDEX                        | (keyword)
-    1814                         | Lsurf
-    YDUPLICATE
-    0.0
-    SCALE
-    1.0  1.0  1.0
-    TRANSLATE
-    0.0  0.0  0.0
-    ANGLE
-    0.000                         | dAinc"""
-
-    for i in range(0, len(self.inter_envs)):
-        section = f"""\nSECTION                                              |  (keyword)
-        {self.inter_offset[i]}    {self.inter_envs[i]}   0.0000    {self.inter_corda[i]}  0.000    {self.inter_num_p[i]}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]
-        AFIL 0.0 1.0
-        airfoil.dat \n"""
-
-        file = file + section
-
-    o = open("asa.avl", "w")
-    o.write(file)
-    o.close()
-
-
-def escrever_macro_old(self):
-    file = f"""Urutau 2020 (2) 
-    0.0                                 | Mach 
-    0     0     0.0                     | iYsym  iZsym  Zsym
-    {self.S}    {self.mac}     {self.wingspan}   | Sref   Cref   Bref 
-    0.00000     0.00000     0.00000   | Xref   Yref   Zref
-    0.00                               | CDp  (optional)
-    SURFACE                      | (keyword)
-    Main Wing
-    {Modelo.num_elementos_corda}        1.0
-    INDEX                        | (keyword)
-    1814                         | Lsurf
-    YDUPLICATE
-    0.0
-    SCALE
-    1.0  1.0  1.0
-    TRANSLATE
-    0.0  0.0  0.0
-    ANGLE
-    0.000                         | dAinc"""
-
-    for i in range(0, len(self.inter_envs)):
-        section = f"""\nSECTION                                              |  (keyword)
-        {self.inter_offset[i]}    {self.inter_envs[i]}   0.0000    {self.inter_corda[i]}  0.000    {self.inter_num_p[i]}    3   | Xle Yle Zle   Chord Ainc   [ Nspan Sspace ]
-        AFIL 0.0 1.0
-        airfoil.dat \n"""
-
-        file = file + section
-
-    o = open("asa.avl", "w")
-    o.write(file)
-    o.close()
+_asa = Asa()
 
 
 def limpar_arquivos():
@@ -280,129 +250,6 @@ def limpar_arquivos():
         if (file == "asa.avl") or (file == "resultado.txt") or (file == "comandos.txt"):
             arquivo = file
             os.remove(arquivo)
-
-
-def coeficientes(self, limpar):
-    """
-    Calcula os coeficientes aerodinâmicos
-
-    :param limpar: Se deseja limpar os arquivos'
-    :type limpar: Boolean
-    """
-    # self.setar_secoes_intermediarias()
-    self.inter_corda = self.cordas
-    self.inter_envs = [0]
-    self.inter_offset = [0]
-    self.inter_num_p = [11, 11, 11, 11]
-    [self.inter_envs.append(item) for item in self.envs]
-    [self.inter_offset.append(item) for item in self.offsets]
-
-    # self.AR = self.wingspan ** 2 / self.S
-    # self.afil = self.cordas[-1] / self.cordas[0]
-    # self.mac = (
-    #     self.cordas[0] * (2 / 3) * ((1 + self.afil + self.afil ** 2) / (1 + self.afil))
-    # )
-
-    self.escrever_macro()
-    self.executar_avl()
-
-    results = (open("resultado.txt")).readlines()
-
-    coefficients = []
-    for line in results:
-        matches = re.findall(r"\d\.\d\d\d\d", line)
-        for value in matches:
-            coefficients.append(float(value))
-
-    self.CD = coefficients[-7]
-    self.CL = coefficients[-8]
-    self.e = coefficients[-1]
-
-    if limpar:
-        limpar_arquivos()
-
-
-def coeficientes_old(self, angulo):
-
-    self.file_and_commands(angulo)
-
-    run_avl_command = "avl.exe<" + "comandos.avl"
-    os.popen(run_avl_command).read()
-
-    results = (open("resultado.txt")).readlines()
-    coefficients = []
-    for line in results:
-        matches = re.findall(r"\d\.\d\d\d\d", line)
-        for value in matches:
-            coefficients.append(float(value))
-
-    self.CD = coefficients[-7]
-    self.CL = coefficients[-8]
-    self.e = coefficients[-1]
-
-    # Limpar
-    dirList = os.listdir()
-    arquivo = ""
-    for file in dirList:
-        if (file == "asa.avl") or (file == "resultado.txt") or (file == "comandos.txt"):
-            arquivo = file
-            os.remove(arquivo)
-
-
-def mtow(self):
-    for k in range(0, 270):
-        if (self.CL == 0) or (self.S < 0):
-            Slo = 2 * Modelo.comprimento_pista_maxima
-            W = 0
-        else:
-            W = (k / (9)) * Modelo.g
-            V = math.sqrt((2 * W) / (Modelo.rho_ar * self.S * self.CL)) * 1.2 * 0.7
-            T = Modelo.a * ((V * 0.7) ** 2) + Modelo.b * (V * 0.7) + Modelo.c
-            self.Drag = 0.5 * Modelo.rho_ar * V ** 2 * self.S * self.CD
-            self.Lift = 0.5 * Modelo.rho_ar * V ** 2 * self.S * self.CL
-            Slo = round(
-                (1.44 * (W) ** (2))
-                / (
-                    Modelo.g
-                    * Modelo.rho_ar
-                    * self.S
-                    * self.CL
-                    * (T - (self.Drag + Modelo.mi_solo * (W - self.Lift)))
-                ),
-                2,
-            )
-
-        if Slo > Modelo.comprimento_pista_maxima:
-            break
-
-    self.W = W  # MTOW em Newton
-    return W
-
-
-def mtow_old(self, rho, a, b, c):
-    for k in range(0, 270):
-        if (self.CL == 0) or (self.S < 0):
-            Slo = 2 * self.pista_total
-            W = 0
-        else:
-            W = (k / (9)) * self.g
-            V = math.sqrt((2 * W) / (self.rho * self.S * self.CL)) * 1.2 * 0.7
-            T = a * ((V * 0.7) ** 2) + b * (V * 0.7) + c
-            D = self.drag(V)
-            L = self.lift(V)
-            Slo = round(
-                (1.44 * (W) ** (2))
-                / (
-                    self.g * self.rho * self.S * self.CL * (T - (D + self.mi * (W - L)))
-                ),
-                2,
-            )
-
-        if Slo > self.pista_total:
-            break
-
-    self.W = W  # MTOW em Newton
-    return W
 
 
 def calcula_carga_paga(real_env, real_corda, real_offset, limpar=True):
@@ -422,11 +269,6 @@ def calcula_lift(real_env, real_corda, real_offset, limpar=True):
 
     global parametros_temp
     parametros_temp = [_asa.S, _asa.CL, _asa.CD, _asa.massa_vazia]
-    # [parametros_temp.append(i) for i in _asa.coef_inter_corda]
-    # [parametros_temp.append(i) for i in _asa.coef_inter_offset]
-
-    # [parametros_temp.append(i) for i in _asa.inter_corda]
-    # [parametros_temp.append(i) for i in _asa.inter_offset]
 
     return _asa.Lift
 
@@ -437,11 +279,6 @@ def calcula_drag(real_env, real_corda, real_offset, limpar=True):
 
     global parametros_temp
     parametros_temp = [_asa.S, _asa.CL, _asa.CD, _asa.massa_vazia]
-    # [parametros_temp.append(i) for i in _asa.coef_inter_corda]
-    # [parametros_temp.append(i) for i in _asa.coef_inter_offset]
-
-    # [parametros_temp.append(i) for i in _asa.inter_corda]
-    # [parametros_temp.append(i) for i in _asa.inter_offset]
 
     return _asa.Drag
 
@@ -452,11 +289,6 @@ def calcula_eficiencia(real_env, real_corda, real_offset, limpar=True):
 
     global parametros_temp
     parametros_temp = [_asa.S, _asa.CL, _asa.CD, _asa.massa_vazia]
-    # [parametros_temp.append(i) for i in _asa.coef_inter_corda]
-    # [parametros_temp.append(i) for i in _asa.coef_inter_offset]
-
-    # [parametros_temp.append(i) for i in _asa.inter_corda]
-    # [parametros_temp.append(i) for i in _asa.inter_offset]
 
     return _asa.Lift / _asa.Drag
 
