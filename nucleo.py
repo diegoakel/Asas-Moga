@@ -5,7 +5,7 @@ import interface
 import Modelo
 
 def Otimizacao():
-    for j in range(4, 5):  # Tipo de problema
+    for j in range(1, 2):  # Tipo de problema
         Modelo.tipo_problema = j
 
         Modelo.no_objetivos = 1
@@ -27,7 +27,9 @@ def Otimizacao():
             pop_new = []
             # analise.calcula_carga_paga([0.64, 1.33, 2.04],[0.4, 0.28, 0.27, 0.07],[0,0,0], False)
 
-            Moga_2020.Evolucao(pop_new)
+            otimizador = Moga_2020.Moga()
+
+            otimizador.Evolucao(pop_new)
             fim = time.time()
             total = fim - inicio
 
@@ -35,10 +37,9 @@ def Otimizacao():
                 path,
                 label,
                 total,
-                Moga_2020.cont_analise_historico[0],
-                Moga_2020.cont_analise_nova[0],
-                Moga_2020.cont_analise_pre_check[0],
+                otimizador.cont_analise_historico[0],
+                otimizador.cont_analise_nova[0],
+                otimizador.cont_analise_pre_check[0],
             )
-
 
 Otimizacao()

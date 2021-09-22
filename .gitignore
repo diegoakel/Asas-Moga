@@ -1,5 +1,5 @@
 asa.avl
-__pycache__/analise.cpython-39.pyc
+__pycache__/*.pyc
 __pycache__/apoio.cpython-39.pyc
 __pycache__/constantes.cpython-39.pyc
 __pycache__/historico.cpython-39.pyc
@@ -17,5 +17,5 @@ apoio/__pycache__/aeroview.cpython-38.pyc
 cobicet/Asas para redes neurais.xlsx
 apoio/.ipynb_checkpoints/aeroview-checkpoint.py
 __pycache__/nicho.cpython-39.pyc
-
+__pycache__/nicho.cpython-39.pyc
 __pycache__/nicho.cpython-39.pyc
