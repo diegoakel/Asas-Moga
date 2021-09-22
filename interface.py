@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 import Modelo
 # import apoio
 
@@ -101,6 +102,9 @@ def Geracao_Sem_Filhos(gen_no, pop_new, objetivos, constraints, objetivos_penali
 def Otimizacao_Finalizada(path, label, total, cont_historico, cont_nova, cont_pre_check):
     completo = path + label
     path = completo + ".txt"
+
+    #Verifica se o diretório existe, caso não exista ele cria toda a cadeia de pastas
+    (Path('.') / completo).mkdir(parents=True, exist_ok=True)
 
     with open(path, "w") as file:
         file.write(f"------------\n")

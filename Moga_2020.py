@@ -120,13 +120,11 @@ class Moga():
             individuo.append(x_min[i] + (x_max[i] - x_min[i]) * random.random())
         return individuo
 
-
     def arredondarpop(self, matriz_pop, x_res) -> List[List[List[float]]]:
         for i in range(0, len(matriz_pop)):
             for j in range(0, len(x_res)):
                 matriz_pop[i][j] = round(matriz_pop[i][j], x_res[j])
         return matriz_pop
-
 
     def evoluir(self, matriz_variaveis, x_min, x_max):
         filhos = []
