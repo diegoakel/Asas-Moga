@@ -4,6 +4,7 @@ import time
 import interface
 import Modelo
 
+
 def Otimizacao():
     for j in range(1, 2):  # Tipo de problema
         Modelo.tipo_problema = j
@@ -16,9 +17,7 @@ def Otimizacao():
             path = f"Resultados/tipo={Modelo.tipo_problema}/"
             # path = f"Resultados/manuais/"
 
-            label = (
-                f"Journal_aero_{Modelo.tipo_problema}_{Modelo.pop_size}_{Modelo.max_gen}_R{i}"
-            )
+            label = f"Journal_aero_{Modelo.tipo_problema}_{Modelo.pop_size}_{Modelo.max_gen}_R{i}"
             nome_otimizacao = path + label
 
             interface.Otimizacao_Iniciada(nome_otimizacao)
@@ -41,5 +40,6 @@ def Otimizacao():
                 otimizador.cont_analise_nova[0],
                 otimizador.cont_analise_pre_check[0],
             )
+
 
 Otimizacao()

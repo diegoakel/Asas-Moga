@@ -28,7 +28,7 @@ fator_corretivo = 1.09
 # parametro otimização
 pop_size = 20
 taxa_mutacao = 0.04
-max_gen = 2
+max_gen = 5
 porcentagem_viavel_primeira_geracao = 0.5
 tolerancia_nova_analise = 0
 raio_nicho = 0.15

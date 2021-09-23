@@ -8,7 +8,7 @@ import random
 from typing import List, Union
 
 
-class Moga():
+class Moga:
     def __init__(self):
         self.cont_analise_historico = [0]
         self.cont_analise_nova = [0]
@@ -99,7 +99,6 @@ class Moga():
 
         return filho1_final, filho2_final
 
-
     def mutation(self, solution):
         decisor = random.random()
         posicao = random.randint(0, len(solution))
@@ -112,7 +111,6 @@ class Moga():
             else:
                 solution = parte1 + "0" + parte2
         return solution
-
 
     def criar_individuo_random(self, x_min, x_max) -> List[List[float]]:
         individuo = []
@@ -137,7 +135,6 @@ class Moga():
                 filhos.append(filho2)
         return filhos
 
-
     def Buscar_Ind_Distante(self, matriz_variaveis, p) -> int:
         """
         Busca o indivíduo mais distante da geração.
@@ -159,7 +156,6 @@ class Moga():
                     dist_temp = temp
         return i_temp
 
-
     def Distancia_Escalar(self, individuo, p, q) -> float:
         temp = 0
         for i in range(0, len(Modelo.x_min)):
@@ -172,8 +168,9 @@ class Moga():
             temp = temp + (x1_ad - x2_ad) ** 2
         return temp ** 0.5
 
-
-    def Penalizacao(self, objetivo, restricao, g_sinal, g_limite, fatores_pen) -> List[float]:
+    def Penalizacao(
+        self, objetivo, restricao, g_sinal, g_limite, fatores_pen
+    ) -> List[float]:
         objetivo_pen = objetivo[:]
         for i in range(0, len(objetivo)):
             for j in range(0, len(restricao)):
@@ -182,7 +179,6 @@ class Moga():
                         (restricao[j] - g_limite[j]) * fatores_pen[j]
                     )
         return objetivo_pen
-
 
     def Checa_viavel(self, vetor_x, restricao, g_sinal, g_limite) -> int:
         if self.Viabilidade_Explicita(vetor_x) == constantes.solucao_inviavel:
@@ -197,13 +193,11 @@ class Moga():
 
         return constantes.solucao_viavel
 
-
     def Viabilidade_Explicita(self, vetor_x) -> int:
         for i in range(0, len(vetor_x)):
             if vetor_x[i] < Modelo.x_min[i] or vetor_x[i] > Modelo.x_max[i]:
                 return constantes.solucao_inviavel  # não viável
         return constantes.solucao_viavel  # viável
-
 
     def Elitismo(self, rank, matriz_function) -> list:
         """
@@ -229,27 +223,24 @@ class Moga():
                     new_solution = nicho.filtra_nicho(
                         new_solution, rank, matriz_function, i
                     )
-                    
+
         return new_solution
-
-
 
     def same_point(self, matriz_function, p, q) -> int:
         for i in range(0, len(matriz_function[p])):
             if matriz_function[p][i] != matriz_function[q][i]:
                 return 1
-        return 0    
+        return 0
 
     def dominated(self, matriz_function, p, q) -> int:
         """
         Diz se a solução p domina a solução q.
 
-        """   
+        """
         for i in range(0, len(matriz_function[p])):
             if matriz_function[p][i] < matriz_function[q][i]:
                 return 1
         return 0
-
 
     def Rank_pop(self, matriz_function) -> List[int]:
         """
@@ -266,27 +257,25 @@ class Moga():
                             rank[p] = rank[p] + 1
         return rank
 
-
     def Criar_NovaGeracao(self, individuo, new_solution) -> List[List[float]]:
         individuo_new = []
         for i in range(0, len(new_solution)):
             individuo_new.append(individuo[new_solution[i]])
         return individuo_new
 
-
     def Adicionar_Filhos(self, individuo, filhos) -> List[List[float]]:
         for i in range(0, len(filhos)):
             individuo.append(filhos[i])
         return individuo
 
-
-    def Avalia_Individuo_NãoViavel(self,):
+    def Avalia_Individuo_NãoViavel(
+        self,
+    ):
         objective = [math.inf for i in range(0, Modelo.no_objetivos)]
         constraint = [0 for i in range(0, len(Modelo.g_limite))]
         parameters = [0 for i in range(0, Modelo.no_parameters)]
 
         return objective, constraint, parameters
-
 
     def Avalia_Individuo_Geral(self, individuo, i, gen_no, geraca_inicial=False):
         vetor_x = individuo[i]
@@ -348,7 +337,6 @@ class Moga():
 
         return objetivo, constraint, objective_penalizado, viavel, parameters
 
-
     def Avaliar_Pop(self, individuo, gen_no, geraca_inicial=False):
         pop_objective = []
         pop_constraint = []
@@ -378,8 +366,9 @@ class Moga():
             pop_parameters,
         )
 
-
-    def limpa_populacao_inviavel(self, populacao, function_viavel) -> List[List[List[float]]]:
+    def limpa_populacao_inviavel(
+        self, populacao, function_viavel
+    ) -> List[List[List[float]]]:
         for i in range(len(function_viavel) - 1, -1, -1):
             if function_viavel[i] == 1:
                 del populacao[i]
@@ -388,7 +377,6 @@ class Moga():
                 # print (f"Removido individuo {i}")
 
         return populacao
-
 
     def Completa_PopInicial(self, pop_new):
         pop_fake = []
@@ -433,8 +421,9 @@ class Moga():
 
         return pop_fake + pop_new
 
-
-    def limpar_historico(self, ) -> None:
+    def limpar_historico(
+        self,
+    ) -> None:
         self.cont_analise_historico[0] = 0
         self.cont_analise_nova[0] = 0
         self.cont_analise_pre_check[0] = 0
@@ -446,7 +435,6 @@ class Moga():
         historico.historico_viavel = []
         historico.historico_parameters = []
 
-
     def Evolucao(self, pop_new) -> None:
         self.limpar_historico()
         pop_new = self.Completa_PopInicial(pop_new)
@@ -454,18 +442,49 @@ class Moga():
             interface.Geracao_Iniciada(gen_no, pop_new)
             individuo = pop_new[:]
             filhos = self.evoluir(individuo, Modelo.x_min, Modelo.x_max)
-            if gen_no < Modelo.max_gen - 1: 
+            if gen_no < Modelo.max_gen - 1:
                 individuo = self.Adicionar_Filhos(individuo, filhos)
 
-            objetivos, constraints, objetivos_penalizados, viavel, parameters = self.Avaliar_Pop(
-                individuo, gen_no
-            )
+            (
+                objetivos,
+                constraints,
+                objetivos_penalizados,
+                viavel,
+                parameters,
+            ) = self.Avaliar_Pop(individuo, gen_no)
 
             rank = self.Rank_pop(objetivos_penalizados)
 
-            interface.Geracao_Finalizada(gen_no, individuo, objetivos, constraints, objetivos_penalizados, viavel, parameters, rank)
-            interface.Geracao_Finalizada_Pareto(gen_no, individuo, objetivos, constraints, objetivos_penalizados, viavel, parameters, rank)
-            interface.Geracao_Sem_Filhos(gen_no, individuo, objetivos, constraints, objetivos_penalizados, viavel, parameters, rank)
+            interface.Geracao_Finalizada(
+                gen_no,
+                individuo,
+                objetivos,
+                constraints,
+                objetivos_penalizados,
+                viavel,
+                parameters,
+                rank,
+            )
+            interface.Geracao_Finalizada_Pareto(
+                gen_no,
+                individuo,
+                objetivos,
+                constraints,
+                objetivos_penalizados,
+                viavel,
+                parameters,
+                rank,
+            )
+            interface.Geracao_Sem_Filhos(
+                gen_no,
+                individuo,
+                objetivos,
+                constraints,
+                objetivos_penalizados,
+                viavel,
+                parameters,
+                rank,
+            )
 
             new_solution = self.Elitismo(rank, objetivos_penalizados)
 
