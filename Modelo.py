@@ -55,7 +55,7 @@ x_min = [
 ]  ## x = deadrise, LCG
 x_max = [2, 2, 2, corda_fuselagem_maxima, 0.15, 0.15, 0.15, 0.25, 0.25, 0.25]
 f_sinal = [constantes.maximizar, constantes.minimizar]  # "-" é maximizar e "+" é minimizar
-f_pen = [1000, 10000, 10000, 10000]  ## f1, f2
+f_pen = [10000, 10000, 10000, 10000]  ## f1, f2
 g_limite = [
     envergadura_maxima,
     corda_minima,
